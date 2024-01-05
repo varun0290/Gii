@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="email_template_for_approve_account_move" model="mail.template">
+            <field name="name">Account Move: Approve</field>
+            <field name="model_id" ref="fs_account_dyanamic_approval.model_account_move" />
+            <field name="subject">${object.name} Submit for Approval</field>
+            <field name="email_from"></field>
+            <field name="email_to"></field>
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px;">
+                    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                        <h2>
+                            <b>Submit for Approval: ${object.name}</b>
+                        </h2>
+                        <br />
+                        <p>
+                            Dear
+                            % for user in object.user_ids:
+                                ${user.name},
+                            % endfor
+                            <br />
+                            <br />
+                            This is inform you that ${object.journal_id.name} is submitted for approval.
+                            <br />
+                            <b>User:</b>
+                            % if object.user_id.name:
+                                ${object.user_id.name}
+                            % endif
+                            <br />
+                            <b>Total Amount:</b>
+                            ${format_amount(object.amount_total, object.currency_id)}
+                            <br />
+                            <b>Approval Level:</b>
+                            % if object.user_id.name:
+                                ${object.approval_level_id.name}
+                            % endif
+                        </p>
+                        You can use the following link and approve the ${object.journal_id.name}<br />
+                        <div style="display: inline-block; margin: 15px; text-align: center">
+                            <a href="/mail/view?model=account.move&amp;res_id=${object.id}" style="padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-color: #875A7B; border: 1px solid #875A7B; border-radius: 3px"
+                            >${object.journal_id.name} Ref: # ${object.name}</a>
+                        </div><br />
+                        Thanks.
+                    </p>
+                </div>
+            </field>
+        </record>
+
+        <record id="email_template_for_reject_account_move" model="mail.template">
+            <field name="name">Account Move: Reject</field>
+            <field name="model_id" ref="fs_account_dyanamic_approval.model_account_move" />
+            <field name="subject">${object.name} Reject ${object.journal_id.name}</field>
+            <field name="email_from"></field>
+            <field name="email_to"></field>
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px;">
+                    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                        <h2>
+                            <b>${object.journal_id.name} Rejected: ${object.name}</b>
+                        </h2>
+                        <br />
+                        Dear ${object.user_id.name},
+                        <br />
+                        <br />
+                        Rejected ${object.journal_id.name} Information.
+                        <br />
+                        <p>
+                            <b>Date:</b> ${format_date(object.rejection_date)}<br/>
+                            <b>Reject By:</b> ${object.reject_by.name}<br/>
+                            <b>Reason:</b> ${object.reject_reason}<br/>
+                        </p>
+                        <br />
+                        <br />
+                        You can use the following link to access the ${object.journal_id.name}.<br /><br />
+                        <div style="display: inline-block; margin: 15px; text-align: center">
+                            <a href="/mail/view?model=account.move&amp;res_id=${object.id}" target="_blank"
+                                style="padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-color: #875A7B; border: 1px solid #875A7B; border-radius: 3px"
+                            >${object.journal_id.name} Ref: # ${object.name}</a>
+                        </div><br />
+                        Thanks.
+                    </p>
+                </div>
+            </field>
+        </record>
+
+        <record id="email_template_for_post_account_move" model="mail.template">
+            <field name="name">Account Move: Confirm</field>
+            <field name="model_id" ref="fs_account_dyanamic_approval.model_account_move" />
+            <field name="subject">${object.name} Confirm ${object.journal_id.name}</field>
+            <field name="email_from"></field>
+            <field name="partner_to"></field>
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px;">
+                    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                        <h2>
+                            <b>${object.journal_id.name} Confirmed: ${object.name}</b>
+                        </h2>
+                        <br />
+                        Dear ${object.user_id.name},
+                        <br />
+                        <br />
+                        This is inform you that your ${object.journal_id.name} is Posted.<br />
+                        You can use the following link to access the ${object.journal_id.name}.<br /><br />
+                        <div style="display: inline-block; margin: 15px; text-align: center">
+                            <a href="/mail/view?model=account.move&amp;res_id=${object.id}" target="_blank"
+                                style="padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-color: #875A7B; border: 1px solid #875A7B; border-radius: 3px"
+                            >${object.journal_id.name} Ref: # ${object.name}</a>
+                        </div><br />
+                        Thanks.
+                    </p>
+                </div>
+            </field>
+        </record>
+
+    </data>
+</odoo>

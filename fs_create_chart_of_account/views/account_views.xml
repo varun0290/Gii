@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="fs_view_account_account_inherit_list" model="ir.ui.view">
+            <field name="name">account.account.tree.view</field>
+            <field name="model">account.account</field>
+            <field name="inherit_id" ref="account_base_import.view_account_base_import_list"/>
+            <field name="arch" type="xml">
+                <xpath expr="//header" position="inside">
+                    <button name="button_create_coa" type="object" string="Create COA" class="btn btn-primary" display="always"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

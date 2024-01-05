@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_account_sh_approval_config,access_account_sh_approval_config,model_account_sh_approval_config,base.group_user,1,1,1,1
+access_account_sh_approval_line,access_account_sh_approval_line,model_account_sh_approval_line,base.group_user,1,1,1,1
+access_account_sh_approval_info,access_account_sh_approval_info,model_account_sh_approval_info,base.group_user,1,1,1,1
+access_account_sh_reject_reason_wizard,access_account_sh_reject_reason_wizard,model_account_sh_reject_reason_wizard,base.group_user,1,1,1,1
