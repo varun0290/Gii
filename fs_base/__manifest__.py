@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 {
-    "name": "Fidobe Account",
+    "name": "Fidobe Base",
     "version": "17.0.0.0",
-    "description": """Fidobe Account""",
-    "summary": "Fidobe Account",
+    "description": """Fidobe Base""",
+    "summary": "Fidobe Base",
     "author": "Fidobe Solutions LLC",
     "website": "https://www.fidobe.com/",
-    "category": "Invoicing",
-    "depends": ["base", "account"],
+    "category": "Base",
+    "depends": ["base", "hr"],
     "data": [
-        "views/account_view.xml",
+        "views/res_user_view.xml",
     ],
     "license": "LGPL-3",
     "installable": True,

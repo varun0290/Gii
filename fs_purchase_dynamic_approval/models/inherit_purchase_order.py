@@ -190,6 +190,7 @@ class PurchaseOrder(models.Model):
                     [
                         ("min_amount", "<", self.amount_untaxed),
                         ("company_ids.id", "in", [self.env.company.id]),
+                        ("department_ids", "in", self.user_id.department_ids.ids),
                     ]
                 )
 
@@ -211,6 +212,7 @@ class PurchaseOrder(models.Model):
                     [
                         ("min_amount", "<", self.amount_total),
                         ("company_ids.id", "in", [self.env.company.id]),
+                        ("department_ids", "in", self.user_id.department_ids.ids),
                     ]
                 )
 
@@ -428,3 +430,34 @@ class PurchaseOrder(models.Model):
 
     def action_reset_to_draft(self):
         self.write({"state": "draft"})
+
+
+class PurchaseOrderLine(models.Model):
+    _inherit = "purchase.order.line"
+
+    @api.constrains("analytic_distribution", "price_subtotal")
+    def _check_analytic_account_budget(self):
+        for record in self:
+            if not record.analytic_distribution:
+                continue
+            crossovered_budget_line = False
+            for account, distribution in record.analytic_distribution.items():
+                analytic_account_id = self.env["account.analytic.account"].search(
+                    [("id", "=", int(account))], limit=1
+                )
+                crossovered_budget_line = (
+                    analytic_account_id.crossovered_budget_line.filtered(
+                        lambda line: record.product_id.property_account_expense_id.id
+                        in line.general_budget_id.account_ids.ids
+                    )
+                )
+            if (
+                crossovered_budget_line
+                and crossovered_budget_line[0].planned_amount < record.price_subtotal
+            ):
+                raise ValidationError(
+                    _(
+                        "Transaction exceeds project budget (%s %s)"
+                        % (record.price_subtotal, record.currency_id.name)
+                    )
+                )

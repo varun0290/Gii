@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="fs_analytic_acc_view_move_form" model="ir.ui.view">
+        <field name="name">fs.analytic.acc.account.move.view.form</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='analytic_distribution']" position="attributes">
+                <attribute name="column_invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='analytic_distribution']" position="after">
+                <field name="analytic_account_id" required="1"/>
+            </xpath>
+            <xpath expr="//field[@name='line_ids']/tree/field[@name='analytic_distribution']" position="attributes">
+                <attribute name="column_invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='line_ids']/tree/field[@name='analytic_distribution']" position="after">
+                <field name="analytic_account_id" required="1"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

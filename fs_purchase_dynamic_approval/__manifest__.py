@@ -9,7 +9,7 @@
     "category": "Purchases",
     "summary": "Dynamic Purchase Order Approval,Dynamic Purchase Approval,Purchase Multi Approval,Purchase Order Multiple Approval, Purchase Order Double Approval,RFQ Dynamic Approval,PO Dynamic Approval,PO Multi Approval,RFQ Multi Approval Odoo",
     "description": """This module allows you to set dynamic and multi-level approvals in the request for quotation/purchase order so each order can be approved by many levels. Purchase orders can be approved based on untaxed/ total amount and approved by particular users or groups they get emails notification about orders that waiting for approval. When a purchase order/RFQ approves or rejects user gets a notification about it.""",
-    "depends": ["purchase", "bus"],
+    "depends": ["purchase", "bus", "fs_base"],
     "data": [
         "security/ir.model.access.csv",
         "data/mail_data.xml",
