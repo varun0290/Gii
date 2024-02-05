@@ -188,7 +188,7 @@ class PurchaseOrder(models.Model):
             if self.company_id.approval_based_on == "untaxed_amount":
                 purchase_approvals = self.env["sh.purchase.approval.config"].search(
                     [
-                        ("min_amount", "<", self.amount_untaxed),
+                        ("min_amount", "<=", self.amount_untaxed),
                         ("company_ids.id", "in", [self.env.company.id]),
                         ("department_ids", "in", self.user_id.department_ids.ids),
                     ]
@@ -210,7 +210,7 @@ class PurchaseOrder(models.Model):
             if self.company_id.approval_based_on == "total":
                 purchase_approvals = self.env["sh.purchase.approval.config"].search(
                     [
-                        ("min_amount", "<", self.amount_total),
+                        ("min_amount", "<=", self.amount_total),
                         ("company_ids.id", "in", [self.env.company.id]),
                         ("department_ids", "in", self.user_id.department_ids.ids),
                     ]

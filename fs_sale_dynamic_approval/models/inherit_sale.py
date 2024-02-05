@@ -189,7 +189,7 @@ class SaleOrder(models.Model):
             if self.company_id.sale_approval_based_on == "untaxed_amount":
                 sale_approvals = self.env["sh.sale.approval.config"].search(
                     [
-                        ("min_amount", "<", self.amount_untaxed),
+                        ("min_amount", "<=", self.amount_untaxed),
                         ("company_ids.id", "in", [self.env.company.id]),
                     ]
                 )
@@ -210,7 +210,7 @@ class SaleOrder(models.Model):
             if self.company_id.sale_approval_based_on == "total":
                 sale_approvals = self.env["sh.sale.approval.config"].search(
                     [
-                        ("min_amount", "<", self.amount_total),
+                        ("min_amount", "<=", self.amount_total),
                         ("company_ids.id", "in", [self.env.company.id]),
                     ]
                 )
