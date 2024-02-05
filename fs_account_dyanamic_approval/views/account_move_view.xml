@@ -80,7 +80,7 @@
         <field name="name">My Approval</field>
         <field name="res_model">account.move</field>
         <field name="type">ir.actions.act_window</field>
-        <field name="view_mode">tree,kanban,form,pivot,graph,calendar,activity</field>
+        <field name="view_mode">tree,kanban,form,pivot,graph,activity</field>
         <field name="view_id" ref="account.view_out_invoice_tree" />
         <field name="domain">[('is_boolean', '=', True)]</field>
         <field name="help" type="html">
@@ -92,7 +92,7 @@
         <field name="name">Waiting Approval</field>
         <field name="res_model">account.move</field>
         <field name="type">ir.actions.act_window</field>
-        <field name="view_mode">tree,kanban,form,pivot,graph,calendar,activity</field>
+        <field name="view_mode">tree,kanban,form,pivot,graph,activity</field>
         <field name="view_id" ref="account.view_in_invoice_tree" />
         <field name="domain">[('state', '=', 'to_approve')]</field>
         <field name="help" type="html">
@@ -105,7 +105,7 @@
         <field name="name">My Approval</field>
         <field name="res_model">account.move</field>
         <field name="type">ir.actions.act_window</field>
-        <field name="view_mode">tree,kanban,form,pivot,graph,calendar,activity</field>
+        <field name="view_mode">tree,kanban,form,pivot,graph,activity</field>
         <field name="view_id" ref="account.view_in_invoice_tree" />
         <field name="domain">[('is_boolean', '=', True)]</field>
         <field name="help" type="html">
