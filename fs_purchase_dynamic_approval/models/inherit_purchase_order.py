@@ -454,7 +454,8 @@ class PurchaseOrderLine(models.Model):
             if (
                 crossovered_budget_line
                 and crossovered_budget_line[0].planned_amount < record.price_subtotal
-                or crossovered_budget_line[0].planned_amount
+                or crossovered_budget_line
+                and crossovered_budget_line[0].planned_amount
                 < abs(crossovered_budget_line[0].practical_amount)
             ):
                 raise ValidationError(
