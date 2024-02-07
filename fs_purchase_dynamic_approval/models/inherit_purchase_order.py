@@ -435,7 +435,7 @@ class PurchaseOrder(models.Model):
 class PurchaseOrderLine(models.Model):
     _inherit = "purchase.order.line"
 
-    @api.constrains("analytic_distribution", "price_subtotal")
+    @api.constrains("analytic_distribution", "price_subtotal", "state")
     def _check_analytic_account_budget(self):
         for record in self:
             if not record.analytic_distribution:
