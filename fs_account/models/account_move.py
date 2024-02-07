@@ -59,8 +59,7 @@ class AccountMoveLine(models.Model):
                         )
                     )
                 )
-
-            if crossovered_budget_line and (
+            elif crossovered_budget_line and (
                 crossovered_budget_line[0].planned_amount
                 + crossovered_budget_line[0].practical_amount
             ) < (record.credit or record.debit):
