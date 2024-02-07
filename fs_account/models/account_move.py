@@ -30,6 +30,36 @@ class AccountMoveLine(models.Model):
         string="Account Analytic",
     )
 
+    @api.constrains("analytic_account_id", "price_subtotal", "state")
+    def _check_analytic_account_budget(self):
+        for record in self:
+            if not record.analytic_account_id:
+                continue
+            crossovered_budget_line = False
+            crossovered_budget_line = (
+                record.analytic_account_id.crossovered_budget_line.filtered(
+                    lambda line: record.product_id.property_account_expense_id.id
+                    in line.general_budget_id.account_ids.ids
+                )
+            )
+            if (
+                crossovered_budget_line
+                and (
+                    crossovered_budget_line[0].planned_amount
+                    + crossovered_budget_line[0].practical_amount
+                )
+                < record.price_subtotal
+            ):
+                raise ValidationError(
+                    _(
+                        "Transaction exceeds project budget (%s %s)"
+                        % (
+                            crossovered_budget_line[0].planned_amount,
+                            record.currency_id.name,
+                        )
+                    )
+                )
+
     @api.constrains("analytic_account_id")
     def _check_analytic_account(self):
         for record in self:
