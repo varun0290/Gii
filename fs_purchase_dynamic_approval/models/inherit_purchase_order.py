@@ -458,6 +458,9 @@ class PurchaseOrderLine(models.Model):
                 raise ValidationError(
                     _(
                         "Transaction exceeds project budget (%s %s)"
-                        % (record.price_subtotal, record.currency_id.name)
+                        % (
+                            crossovered_budget_line[0].planned_amount,
+                            record.currency_id.name,
+                        )
                     )
                 )
