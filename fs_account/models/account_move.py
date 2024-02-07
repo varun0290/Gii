@@ -60,6 +60,25 @@ class AccountMoveLine(models.Model):
                     )
                 )
 
+            if (
+                crossovered_budget_line
+                and (
+                    crossovered_budget_line[0].planned_amount
+                    + crossovered_budget_line[0].practical_amount
+                )
+                < record.credit
+                or record.debit
+            ):
+                raise ValidationError(
+                    _(
+                        "Transaction exceeds project budget (%s %s)"
+                        % (
+                            crossovered_budget_line[0].planned_amount,
+                            record.currency_id.name,
+                        )
+                    )
+                )
+
     @api.constrains("analytic_account_id")
     def _check_analytic_account(self):
         for record in self:
