@@ -30,6 +30,11 @@ class PurchaseOrder(models.Model):
     rejection_date = fields.Datetime(string="Reject Date", readonly=True)
     reject_by = fields.Many2one("res.users", string="Reject By", readonly=True)
     reject_reason = fields.Char(string="Reject Reason", readonly=True)
+    department_ids = fields.Many2many(
+        "hr.department",
+        related="user_id.department_ids",
+        string="Departments",
+    )
 
     def compute_is_boolean(self):
         if self.env.user.id in self.user_ids.ids or any(

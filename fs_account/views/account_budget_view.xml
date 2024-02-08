@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record model="ir.ui.view" id="fs_crossovered_budget_view_inherited_form">
+        <field name="name">fs.crossovered.budget.view.inherited.form</field>
+        <field name="model">crossovered.budget</field>
+        <field name="inherit_id" ref="account_budget.crossovered_budget_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='crossovered_budget_line']/tree/field[@name='practical_amount']" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </xpath>
+            <xpath expr="//field[@name='crossovered_budget_line']/tree/field[@name='theoritical_amount']" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </xpath>
+            <xpath expr="//field[@name='crossovered_budget_line']/tree/field[@name='percentage']" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </xpath>
+            <xpath expr="//field[@name='crossovered_budget_line']/tree/field[@name='practical_amount']" position="before">
+                <field name="balance"/>
+            </xpath>
+        </field>
+    </record>
+    
+    <record model="ir.ui.view" id="fs_view_account_analytic_account_form_inherit_budget">
+        <field name="name">fs.account.analytic.account.form.inherit.budget</field>
+        <field name="model">account.analytic.account</field>
+        <field name="inherit_id" ref="account_budget.view_account_analytic_account_form_inherit_budget"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='crossovered_budget_line']/tree/field[@name='practical_amount']" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </xpath>
+            <xpath expr="//field[@name='crossovered_budget_line']/tree/field[@name='theoritical_amount']" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </xpath>
+            <xpath expr="//field[@name='crossovered_budget_line']/tree/field[@name='percentage']" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </xpath>
+            <xpath expr="//field[@name='crossovered_budget_line']/tree/field[@name='practical_amount']" position="before">
+                <field name="balance"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

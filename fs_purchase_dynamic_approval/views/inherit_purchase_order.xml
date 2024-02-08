@@ -31,6 +31,10 @@
 
             </xpath>
 
+            <xpath expr="//div[@name='reminder']" position="after">
+                <field name="department_ids" widget="many2many_tags"/>
+            </xpath>
+
             <xpath expr="//notebook//page[@name='purchase_delivery_invoice']" position="after">
                 <page string="Approval Info">
                     <group>
