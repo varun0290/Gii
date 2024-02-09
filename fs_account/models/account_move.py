@@ -50,24 +50,54 @@ class AccountMoveLine(models.Model):
                 )
                 < record.price_subtotal
             ):
+                planned_amount = "{:,}".format(
+                    crossovered_budget_line[0].planned_amount
+                )
                 raise ValidationError(
                     _(
                         "Transaction exceeds project budget (%s %s)"
                         % (
-                            crossovered_budget_line[0].planned_amount,
+                            planned_amount,
                             record.currency_id.name,
                         )
                     )
                 )
-            elif crossovered_budget_line and (
-                crossovered_budget_line[0].planned_amount
-                + crossovered_budget_line[0].practical_amount
-            ) < (record.credit or record.debit):
+            elif (
+                crossovered_budget_line
+                and (
+                    crossovered_budget_line[0].planned_amount
+                    + crossovered_budget_line[0].practical_amount
+                )
+                < record.credit
+            ):
+                planned_amount = "{:,}".format(
+                    crossovered_budget_line[0].planned_amount
+                )
                 raise ValidationError(
                     _(
                         "Transaction exceeds project budget (%s %s)"
                         % (
-                            crossovered_budget_line[0].planned_amount,
+                            planned_amount,
+                            record.currency_id.name,
+                        )
+                    )
+                )
+            elif (
+                crossovered_budget_line
+                and (
+                    crossovered_budget_line[0].planned_amount
+                    + crossovered_budget_line[0].practical_amount
+                )
+                < record.debit
+            ):
+                planned_amount = "{:,}".format(
+                    crossovered_budget_line[0].planned_amount
+                )
+                raise ValidationError(
+                    _(
+                        "Transaction exceeds project budget (%s %s)"
+                        % (
+                            planned_amount,
                             record.currency_id.name,
                         )
                     )
