@@ -429,10 +429,14 @@ class SaleOrderLine(models.Model):
 
     def _prepare_invoice_line(self, **optional_values):
         results = super(SaleOrderLine, self)._prepare_invoice_line(**optional_values)
-        if self.order_id.analytic_account_id:
-            results.update(
-                {
-                    "analytic_account_id": self.order_id.analytic_account_id.id,
-                }
-            )
+        if self.analytic_distribution:
+            for account, distribution in self.analytic_distribution.items():
+                analytic_account_id = self.env["account.analytic.account"].search(
+                    [("id", "=", int(account))], limit=1
+                )
+                results.update(
+                    {
+                        "analytic_account_id": analytic_account_id.id,
+                    }
+                )
         return results
