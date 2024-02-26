@@ -440,6 +440,20 @@ class PurchaseOrder(models.Model):
 class PurchaseOrderLine(models.Model):
     _inherit = "purchase.order.line"
 
+    def _prepare_account_move_line(self, move=False):
+        results = super(SaleOrderLine, self)._prepare_account_move_line(move)
+        if self.analytic_distribution:
+            for account, distribution in line.analytic_distribution.items():
+                analytic_account_id = self.env["account.analytic.account"].search(
+                    [("id", "=", int(account))], limit=1
+                )
+                results.update(
+                    {
+                        "analytic_account_id": analytic_account_id.id,
+                    }
+                )
+        return results
+
     @api.constrains("analytic_distribution", "price_subtotal", "state")
     def _check_analytic_account_budget(self):
         for record in self:

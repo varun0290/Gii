@@ -422,3 +422,17 @@ class SaleOrder(models.Model):
 
     def action_reset_to_draft(self):
         self.write({"state": "draft"})
+
+
+class SaleOrderLine(models.Model):
+    _inherit = "sale.order.line"
+
+    def _prepare_invoice_line(self, **optional_values):
+        results = super(SaleOrderLine, self)._prepare_invoice_line(**optional_values)
+        if self.order_id.analytic_account_id:
+            results.update(
+                {
+                    "analytic_account_id": self.order_id.analytic_account_id.id,
+                }
+            )
+        return results
