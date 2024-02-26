@@ -443,7 +443,7 @@ class PurchaseOrderLine(models.Model):
     def _prepare_account_move_line(self, move=False):
         results = super(PurchaseOrderLine, self)._prepare_account_move_line(move)
         if self.analytic_distribution:
-            for account, distribution in line.analytic_distribution.items():
+            for account, distribution in self.analytic_distribution.items():
                 analytic_account_id = self.env["account.analytic.account"].search(
                     [("id", "=", int(account))], limit=1
                 )
