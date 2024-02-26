@@ -7,24 +7,19 @@ from odoo.exceptions import ValidationError
 class AccountMove(models.Model):
     _inherit = "account.move"
 
-    # def action_post(self):
-    #     for move in self:
-    #         inv_analytic_account_id = move.invoice_line_ids.filtered(
-    #             lambda l: not l.analytic_account_id
-    #         )
-    #         if move.move_type and move.move_type != "entry" and inv_analytic_account_id:
-    #             raise ValidationError(_("Please add analytic account in line."))
+    def action_post(self):
+        inv_analytic_account_id = self.invoice_line_ids.filtered(
+            lambda l: not l.analytic_account_id
+        )
+        if self.move_type != "entry" and inv_analytic_account_id:
+            raise ValidationError(_("Please add analytic account in line."))
 
-    #         line_analytic_account_id = move.invoice_line_ids.filtered(
-    #             lambda l: not l.analytic_account_id
-    #         )
-    #         if (
-    #             move.move_type
-    #             and move.move_type == "entry"
-    #             and line_analytic_account_id
-    #         ):
-    #             raise ValidationError(_("Please add analytic account in line."))
-    #     return super(AccountMove, self).action_post()
+        line_analytic_account_id = self.invoice_line_ids.filtered(
+            lambda l: not l.analytic_account_id
+        )
+        if self.move_type == "entry" and line_analytic_account_id:
+            raise ValidationError(_("Please add analytic account in line."))
+        return super(AccountMove, self).action_post()
 
 
 class AccountMoveLine(models.Model):
