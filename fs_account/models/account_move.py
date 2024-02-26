@@ -33,6 +33,8 @@ class AccountMoveLine(models.Model):
     @api.constrains("analytic_account_id", "price_subtotal", "state")
     def _check_analytic_account_budget(self):
         for record in self:
+            if record.move_type in ("out_invoice", "out_refund"):
+                continue
             if not record.analytic_account_id:
                 continue
             crossovered_budget_line = False
@@ -103,16 +105,19 @@ class AccountMoveLine(models.Model):
                     )
                 )
 
-    @api.constrains("analytic_account_id")
-    def _check_analytic_account(self):
-        for record in self:
-            if record.currency_id.id != record.analytic_account_id.currency_id.id:
-                raise ValidationError(
-                    _(
-                        "Project Currency (%s) should be same as transaction currency"
-                        % (record.analytic_account_id.currency_id.name)
-                    )
-                )
+    # @api.constrains("analytic_account_id")
+    # def _check_analytic_account(self):
+    #     for record in self:
+    #         if (
+    #             record.analytic_account_id.currency_id
+    #             and record.currency_id.id != record.analytic_account_id.currency_id.id
+    #         ):
+    #             raise ValidationError(
+    #                 _(
+    #                     "Project Currency (%s) should be same as transaction currency"
+    #                     % (record.analytic_account_id.currency_id.name)
+    #                 )
+    #             )
 
     def _prepare_analytic_lines(self):
         if not self.analytic_account_id:
