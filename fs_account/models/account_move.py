@@ -8,14 +8,16 @@ class AccountMove(models.Model):
     _inherit = "account.move"
 
     def action_post(self):
+        for line in self.invoice_line_ids:
+            for account, distribution in line.analytic_distribution.items():
+                analytic_account_id = self.env["account.analytic.account"].search(
+                    [("id", "=", int(account))], limit=1
+                )
+                line.analytic_account_id = analytic_account_id.id
         inv_analytic_account_id = self.invoice_line_ids.filtered(
             lambda l: not l.analytic_account_id
         )
-        if (
-            not self.expense_sheet_id
-            and self.move_type != "entry"
-            and inv_analytic_account_id
-        ):
+        if self.move_type != "entry" and inv_analytic_account_id:
             raise ValidationError(_("Please add analytic account in line."))
 
         return super(AccountMove, self).action_post()
