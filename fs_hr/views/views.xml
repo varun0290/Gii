@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="ent_saudi_gosi.gosi_employee" model="ir.ui.menu">
+        <field name="sequence">71</field>
+    </record>
+    <record id="employee_number_view_inherit" model="ir.ui.view">
+        <field name="name">employee.number.view.inherit</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="ent_uae_wps_report.employee_number_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='labour_card_number']/parent::group/parent::group" position='replace'/>
+            <xpath expr="//field[@name='company_country_code']" position="after">
+                <field name="labour_card_number"/>
+                <field name="salary_card_number"/>
+            </xpath>
+            <xpath expr="//field[@name='coach_id']" position="after">
+                <field name="agent_id"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="hr_employee_view_form" model="ir.ui.view">
+        <field name="name">hr_employee_view_form</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='emergency_contact']/parent::group" position="replace"/>
+            <field name="children" position="after">
+                <field name="emergency_contact"/>
+                <field name="emergency_phone" class="o_force_ltr"/>
+            </field>
+        </field>
+    </record>
+    <record id="view_employee_form" model="ir.ui.view">
+        <field name="name">hr_employee_view_form</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="ent_hr_employee_updation.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='identification_id']" position="replace"/>
+            <xpath expr="//group[@name='passport_id']" position="replace">
+                <group>
+                    <group name="identification_id" string="Identification ID">
+                        <field name="identification_id"/>
+                        <field name="joining_date" readonly="0"/>
+                        <field name="id_expiry_date" groups="hr.group_hr_user" invisible="identification_id in ('None','False')"/>
+                        <field name="id_attachment_ids" groups="hr.group_hr_user" widget="many2many_binary" class="oe_inline" invisible="identification_id in ('None','False')"/>
+                    </group>
+                    <group name="passport_id" string="Passport ID">
+                        <field name="passport_id"/>
+                        <field name="passport_expiry_date" groups="hr.group_hr_user" invisible="passport_id in ('None','False')"/>
+                        <field name="passport_attachment_ids" groups="hr.group_hr_user" widget="many2many_binary" class="oe_inline" invisible="passport_id in ('None','False')"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

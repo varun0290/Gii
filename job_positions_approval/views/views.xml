@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="hr_job_view_form" model="ir.ui.view">
+        <field name="name">hr.job.view.form</field>
+        <field name="model">hr.job</field>
+        <field name="inherit_id" ref="hr.view_hr_job_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='active']" position="before">
+                <header>
+                    <button name="action_set_to_draft" type="object" string="Set to Draft" invisible="status == 'draft'"/>
+                    <button name="action_approve" type="object" string="Approve" invisible="status != 'draft'"/>
+                    <button name="action_reject" type="object" string="Reject" invisible="status == 'rejected'"/>
+                    <field name="status" widget="statusbar"/>
+                </header>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="hr_job_view_tree_inherit" model="ir.ui.view">
+        <field name="model">hr.job</field>
+        <field name="inherit_id" ref="hr.view_hr_job_tree"/>
+        <field name="arch" type="xml">
+            <field name="company_id" position="after">
+                <field name="status"
+                    decoration-success="status == 'approved'"
+                    decoration-danger="status == 'rejected'"
+                    widget="badge"
+                />
+            </field>
+        </field>
+    </record>
+
+    <record id="view_hr_job_kanban_inherit" model="ir.ui.view">
+        <field name="model">hr.job</field>
+        <field name="inherit_id" ref="hr_recruitment.view_hr_job_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('o_kanban_card_header_title')]//field[@name='user_id']" position="after">
+                <field 
+                    name="status"
+                    widget="badge"
+                    decoration-success="status == 'approved'"
+                    decoration-danger="status == 'rejected'"
+                />
+            </xpath>
+        </field>
+    </record>
+
+    <!-- <record id="action_hr_job_payroll_configuration" model="ir.actions.server">
+        <field name="name">Job Configuration</field>
+        <field name="model_id" ref="l10n_be_hr_contract_salary.model_hr_job"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.action_hr_job_payroll_configuration()
+        </field>
+    </record> -->
+
+</odoo>

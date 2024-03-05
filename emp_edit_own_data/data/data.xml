@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="group_emp_allow_edit_own_data" model="res.groups">
+        <field name="name">Allow Employees To Update Their Own Data</field>
+    </record>
+</odoo>
