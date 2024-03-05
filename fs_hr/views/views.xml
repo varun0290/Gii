@@ -19,7 +19,7 @@
         </field>
     </record>
     <record id="hr_employee_view_form" model="ir.ui.view">
-        <field name="name">hr_employee_view_form</field>
+        <field name="name">hr.employee.view.form</field>
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
@@ -30,8 +30,24 @@
             </field>
         </field>
     </record>
+    <record id="gratuity_configuration_form_view" model="ir.ui.view">
+        <field name="name">gratuity.configuration.form.view</field>
+        <field name="model">gratuity.configuration</field>
+        <field name="inherit_id" ref="ent_hr_gratuity_settlement.gratuity_configuration_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('o_row_readonly')]/parent::group" position="replace">
+                <p class="p-0 m-0">
+                    <span class="oe_inline">Employee is entitled to</span>
+                    <field name="percentage" class="oe_inline px-2 text-bolder" readonly="1"/>
+                    <span class="oe_inline">of the</span>
+                    <field name="employee_working_days" class="oe_inline px-2 text-bolder" readonly="1"/>
+                    <span class="oe_inline">-days gratuity pay.</span>
+                </p>
+            </xpath>
+        </field>
+    </record>
     <record id="view_employee_form" model="ir.ui.view">
-        <field name="name">hr_employee_view_form</field>
+        <field name="name">view.employee.form</field>
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="ent_hr_employee_updation.view_employee_form"/>
         <field name="arch" type="xml">

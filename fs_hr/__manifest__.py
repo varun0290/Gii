@@ -12,6 +12,7 @@
         'ent_saudi_gosi',
         'ent_uae_wps_report',
         'ent_hr_employee_updation',
+        "ent_hr_gratuity_settlement",
     ],
     "data": [
         "views/views.xml",
