@@ -26,3 +26,16 @@ class HrJob(models.Model):
             name=name, args=args, operator=operator, limit=limit
         )
         return result
+
+class HrApplicant(models.Model):
+    _inherit = 'hr.applicant'
+
+    @api.model
+    def default_get(self, fields):
+        res = super().default_get(fields)
+        job_id = res.get('job_id')
+        if isinstance(job_id, int) and job_id > 0:
+            job_id = self.env['hr.job'].browse([job_id])
+            if job_id and job_id.status != 'approved':
+                del res['job_id']
+        return res
