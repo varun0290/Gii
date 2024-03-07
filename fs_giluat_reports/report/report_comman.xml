@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="header_external_layout">
+        <div class="header">
+            <div class="row">
+                <div class="col-4"/>
+                <div class="col-4"/>
+                <div class="col-4 p-3">
+                    <img t-if="company.logo" class="img-fluid" 
+                        t-att-src="image_data_uri(company.logo)" alt="Logo"/>
+                </div>
+            </div>
+        </div>
+    </template>
+    <template id="external_layout">
+        <t t-if="not o" t-set="o" t-value="doc"/>
+        <t t-if="not company">
+            <!-- Multicompany -->
+            <t t-if="company_id">
+                <t t-set="company" t-value="company_id"/>
+            </t>
+            <t t-elif="o and 'company_id' in o and o.company_id.sudo()">
+                <t t-set="company" t-value="o.company_id.sudo()"/>
+            </t>
+            <t t-else="else">
+                <t t-set="company" t-value="res_company"/>
+            </t>
+        </t>
+        <t t-call="fs_giluat_reports.header_external_layout"/>
+        <div t-attf-class="article o_report_layout_standard o_company_#{company.id}_layout {{  'o_layout_background' if company.layout_background in ['Geometric', 'Custom']  else  '' }}"
+             t-attf-style="background-image: url({{ 'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else '/base/static/img/bg_background_template.jpg' if company.layout_background == 'Geometric' else ''}});"
+             t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+            <div>
+                <t t-call="web.address_layout"/>
+            </div>
+            <t t-out="0"/>
+        </div>
+        <t t-call="fs_giluat_reports.footer_external_layout"/>
+    </template>
+    <template id="footer_external_layout">
+        <div class="footer">
+            <style>
+                .bcb {
+                    border-color: black !important;
+                }
+            </style>
+            <p class="border-top border-2 bcb text-center">
+                <t t-if="o.company_id.street">
+                    <span class="p-0 m-0" t-esc="o.company_id.street"/>, 
+                </t>
+                <t t-if="o.company_id.street2">
+                    <span class="p-0 m-0" t-esc="o.company_id.street2"/>,
+                </t>
+                <t t-if="o.company_id.city">
+                    <span class="p-0 m-0" t-esc="o.company_id.city"/>,
+                </t>
+                <t t-if="o.company_id.state_id and o.company_id.zip">
+                    <span t-field="o.company_id.state_id"/>
+                    -
+                    <span t-esc="o.company_id.zip"/>,
+                </t>
+                <t t-elif="o.company_id.state_id and not o.company_id.zip">
+                    <span class="p-0 m-0" t-field="o.company_id.state_id"/>,
+                </t>
+                <t t-elif="not o.company_id.state_id and o.company_id.zip">
+                    <span class="p-0 m-0" t-field="o.company_id.zip"/>,
+                </t>
+                <span class="p-0 m-0" t-if="o.company_id.country_id" t-field="o.company_id.country_id"/>
+                <t t-if="o.company_id.phone">
+                    || Tel: <span t-field="o.company_id.phone"/>
+                </t>
+                <t t-if="o.company_id.email">
+                    || Email: <span t-field="o.company_id.email"/>
+                </t>
+            </p>
+        </div>
+    </template>
+
+    <record id="paperformat_a4_report" model="report.paperformat">
+        <field name="name">Gulf A4</field>
+        <field name="default" eval="True" />
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">55</field>
+        <field name="margin_bottom">15</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False" />
+        <field name="header_spacing">50</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="action_employment_certificate" model="ir.actions.report">
+        <field name="name">Employement Certificate</field>
+        <field name="model">hr.employee</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">fs_giluat_reports.report_employement_certificate</field>
+        <field name="report_file">fs_giluat_reports.report_employement_certificate</field>
+        <field name="paperformat_id" ref="fs_giluat_reports.paperformat_a4_report"/>
+        <field name="binding_model_id" ref="hr.model_hr_employee"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_employment_offer_letter" model="ir.actions.report">
+        <field name="name">Employement Offer Letter</field>
+        <field name="model">hr.employee</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">fs_giluat_reports.report_employement_offer_letter</field>
+        <field name="report_file">fs_giluat_reports.report_employement_offer_letter</field>
+        <field name="paperformat_id" ref="fs_giluat_reports.paperformat_a4_report"/>
+        <field name="binding_model_id" ref="hr.model_hr_employee"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_probation_period_review_confirmed" model="ir.actions.report">
+        <field name="name">Probation Period Review - Confirmed</field>
+        <field name="model">hr.employee</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">fs_giluat_reports.report_probation_period_review_confirmed</field>
+        <field name="report_file">fs_giluat_reports.report_probation_period_review_confirmed</field>
+        <field name="paperformat_id" ref="fs_giluat_reports.paperformat_a4_report"/>
+        <field name="binding_model_id" ref="hr.model_hr_employee"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_probation_period_review_not_confirmed" model="ir.actions.report">
+        <field name="name">Probation Period Review - Not Confirmed</field>
+        <field name="model">hr.employee</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">fs_giluat_reports.report_probation_period_review_not_confirmed</field>
+        <field name="report_file">fs_giluat_reports.report_probation_period_review_not_confirmed</field>
+        <field name="paperformat_id" ref="fs_giluat_reports.paperformat_a4_report"/>
+        <field name="binding_model_id" ref="hr.model_hr_employee"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_employment_certificate_salary_transfer_letter" model="ir.actions.report">
+        <field name="name">Employment Certificate/Salary Transfer Letter</field>
+        <field name="model">hr.employee</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">fs_giluat_reports.report_employment_certificate_salary_transfer_letter</field>
+        <field name="report_file">fs_giluat_reports.report_employment_certificate_salary_transfer_letter</field>
+        <field name="paperformat_id" ref="fs_giluat_reports.paperformat_a4_report"/>
+        <field name="binding_model_id" ref="hr.model_hr_employee"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_noc_business_trip" model="ir.actions.report">
+        <field name="name">NOC - Business Trip</field>
+        <field name="model">hr.employee</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">fs_giluat_reports.report_noc_business_trip</field>
+        <field name="report_file">fs_giluat_reports.report_noc_business_trip</field>
+        <field name="paperformat_id" ref="fs_giluat_reports.paperformat_a4_report"/>
+        <field name="binding_model_id" ref="hr.model_hr_employee"/>
+        <field name="binding_type">report</field>
+    </record>
+
+</odoo>

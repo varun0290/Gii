@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_probation_period_review_not_confirmed_doc">
+        <t t-call="fs_giluat_reports.external_layout">
+            <div class="page" style="font-family: Arial !important;">
+                <style>
+                    .fw-900 {
+                        font-weight: 900 !important;
+                    }
+                    .text-justify {
+                        text-align: justify;
+                    }
+                    .bcb {
+                        border-color: black !important;
+                    }
+                </style>
+                <p class="p-0 m-0 mb-5 text-justify">
+                    Date: <span t-esc="datetime.date.today()" t-options="{'widget': 'date', 'format': 'dd/MM/YYYY'}"/>
+                </p>
+                <p class="p-0 m-0 mb-4 text-justify">To: <span t-field="o.name"/>,</p>
+                <h5 class="fw-900 p-0 m-0 mb-4">Subject: Probation Period Review - Not Confirmed</h5>
+                <p class="p-0 m-0 mb-2 text-justify">Dear: <span t-field="o.name"/>,</p>
+                <p class="p-0 m-0 mb-2 text-justify">
+                    After careful consideration of your overall performance within your current role in our firm, I am sorry to share that the decision has been reached and your services will not be confirmed.
+                </p>
+                <p class="p-0 m-0 mb-2 text-justify">
+                    The HR Department will contact you to carry out the needful exit formalities.
+                </p>
+                <p class="p-0 m-0 mb-2 text-justify">
+                    We wish you success in your career endeavors.
+                </p>
+                <p class="p-0 m-0 mb-2 text-justify">
+                    Yours sincerely,
+                </p>
+                <table class="table table-sm table-borderless">
+                    <tr>
+                        <td class="w-50 p-0 m-0">
+                            <p class="p-0 m-0 mt-4">For and on behalf of</p>
+                            <p class="p-0 m-0 fw-900" t-field="o.company_id"/>
+                            <p class="p-0 m-0 mt-5 pt-5 fw-900">
+                                <span class="border-top bcb pt-1">Human Resources Department and Signature</span>
+                            </p>
+                        </td>
+                        <td class="w-50 bcb">
+                            <p class="p-0 m-0 text-center fw-900">
+                                <br/><br/><br/><br/><br/><br/>
+                                <span class="border-top bcb p-0 m-0 pt-1" t-field="o.name"/>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </t>
+    </template>
+    <template id="report_probation_period_review_not_confirmed">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-set="lang" t-value="False"/>
+                <t t-if="o.user_id and o.user_id.partner_id">
+                    <t t-set="lang" t-value="o.user_id.partner_id.sudo().lang"/>
+                </t>
+                <t t-call="fs_giluat_reports.report_probation_period_review_not_confirmed_doc" t-lang="lang"/>
+            </t>
+        </t>
+    </template>
+</odoo>

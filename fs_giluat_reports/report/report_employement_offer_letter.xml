@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_employement_offer_letter_doc">
+        <t t-call="fs_giluat_reports.external_layout">
+            <div class="page" style="font-family: Arial !important;">
+                <style>
+                    .fw-900 {
+                        font-weight: 900 !important;
+                    }
+                    .text-justify {
+                        text-align: justify;
+                    }
+                    .bcb {
+                        border-color: black !important;
+                    }
+                </style>
+                <p class="p-0 m-0 mb-2 text-justify">
+                    Date: <span t-esc="datetime.date.today()" t-options="{'widget': 'date', 'format': 'dd/MM/YYYY'}"/>
+                </p>
+                <p class="p-0 m-0 mb-2 text-justify">To: Mr./Ms.: <span t-field="o.name"/></p>
+                <p class="p-0 m-0 mb-2 text-justify">Dear <span t-field="o.name"/>,</p>
+                <p class="p-0 m-0 mb-2 text-justify">
+                    It is our pleasure to extend the following offer of employment to you on behalf of <span t-field="o.company_id"/>. 
+                </p>
+                <p class="p-0 m-0 mb-2 text-justify">
+                    Please review the same and confirm your acceptance of the offered position, bearing that this offer is subject to approval by the Labour, Immigration and Security department of UAE as is the case with any expatriate employment in UAE.
+                </p>
+                <table class="table table-sm table-borderless">
+                    <tr>
+                        <td class="w-25 px-0 mx-0">Title of Job:</td>
+                        <td class="w-75 px-0 mx-0">
+                            <span t-field="o.job_id"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="w-25 px-0 mx-0">Reporting to:</td>
+                        <td class="w-75 px-0 mx-0">
+                            <span t-field="o.parent_id"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="w-25 px-0 mx-0">Working Hours:</td>
+                        <td class="w-75 px-0 mx-0 text-justify">
+                            Business hours of the Company from 9:00 AM to 5:30 PM, Monday to Friday with half an hour lunch break.
+                        </td>
+                    </tr>
+                    <tr t-if="o.contract_id">
+                        <td class="w-25 px-0 mx-0">Compensation:</td>
+                        <td class="w-75 px-0 mx-0">
+                            <table class="pt-2 table table-sm table-borderless">
+                                <tr>
+                                    <td class="w-25 px-0 mx-0">Gross Salary:</td>
+                                    <td class="w-75 px-0 mx-0"></td>
+                                </tr>
+                                <tr>
+                                    <td class="w-25 px-0 mx-0">Basic Salary:</td>
+                                    <td class="w-75 px-0 mx-0">
+                                        <span t-field="o.contract_id.wage"/>
+                                        <span t-if="o.contract_id.wage_type == 'monthly'"> / per month</span>
+                                        <span t-if="o.contract_id.wage_type == 'hour'"> / per hour</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="w-25 px-0 mx-0">Housing Allowance:</td>
+                                    <td class="w-75 px-0 mx-0">
+                                        <span t-field="o.contract_id.l10n_ae_housing_allowance"/>
+                                        <span t-if="o.contract_id.wage_type == 'monthly'"> / per month</span>
+                                        <span t-if="o.contract_id.wage_type == 'hour'"> / per hour</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="w-25 px-0 mx-0">Other Allowances:</td>
+                                    <td class="w-75 px-0 mx-0">
+                                        <span t-field="o.contract_id.l10n_ae_other_allowances"/>
+                                        <span t-if="o.contract_id.wage_type == 'monthly'"> / per month</span>
+                                        <span t-if="o.contract_id.wage_type == 'hour'"> / per hour</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="w-25 px-0 mx-0">Medical Insurance &amp; Visa:</td>
+                        <td class="w-75 px-0 mx-0 text-justify">
+                            (For self as per company policy) or (Family Package as per company policy)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="w-25 px-0 mx-0">Performance Bonus:</td>
+                        <td class="w-75 px-0 mx-0 text-justify">
+                            There will be a discretionary bonus which is subject to achievement of the employee KPIs and business plan target and the company's overall profitability for the accounting period.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="w-25 px-0 mx-0">Holidays &amp; Sick Leave:</td>
+                        <td class="w-75 px-0 mx-0 text-justify">
+                            In addition to the private sector holidays, you will be entitled to 22 working days paid holiday annually and as approved by the Direct Manager. As per the company policy a maximum of 5 working days can be carried forward to the subsequent year and availed before the end of March.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="w-25 px-0 mx-0">Probation period:</td>
+                        <td class="w-75 px-0 mx-0">
+                            (1,2,3) Months
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="w-25 px-0 mx-0">End of Service Benefits:</td>
+                        <td class="w-75 px-0 mx-0">
+                            As per applicable Labour Law in force in the UAE
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="w-25 px-0 mx-0">Other conditions added:</td>
+                        <td class="w-75 px-0 mx-0">
+                            <p class="p-0 m-0">Relocation benefits?</p>
+                            <p class="p-0 m-0">Sign-In bonus?</p>
+                            <p class="p-0 m-0">Salary review after probation confirmation?</p>
+                            <p class="p-0 m-0">Airfare Tickets?</p>
+                        </td>
+                    </tr>
+                </table>
+                <p class="p-0 m-0 mb-2 text-justify">
+                    We look forward to your confirmation and commencing your onboarding process.
+                </p>
+                <table class="table table-sm table-borderless">
+                    <tr>
+                        <td class="w-75 p-0 m-0">
+                            <p class="p-0 m-0 mb-2 text-justify">Best regards,</p>
+                            <p class="p-0 m-0 mt-4 text-justify">On behalf of <span t-field="o.company_id"/></p>
+                            <p class="p-0 m-0 mt-5 pt-5 fw-900">
+                                <span class="border-top bcb pt-1">HR Department</span>
+                            </p>
+                        </td>
+                        <td class="w-25 border border-2 bcb">
+                            <div class="border bcb p-1 h-100">
+                                <p class="p-0 m-0">I Accept this Provisional Offer of Employment</p>
+                                <p class="p-0 m-0 mt-2">Signature:</p>
+                                <p class="p-0 m-0 pt-4 mt-4">
+                                    <span class="border-top bcb p-0 m-0 pt-1">Name:</span>
+                                </p>
+                                <p class="p-0 m-0">Date:</p>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </t>
+    </template>
+    <template id="report_employement_offer_letter">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-set="lang" t-value="False"/>
+                <t t-if="o.user_id and o.user_id.partner_id">
+                    <t t-set="lang" t-value="o.user_id.partner_id.sudo().lang"/>
+                </t>
+                <t t-call="fs_giluat_reports.report_employement_offer_letter_doc" t-lang="lang"/>
+            </t>
+        </t>
+    </template>
+</odoo>

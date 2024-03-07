@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_employement_certificate_doc">
+        <t t-call="fs_giluat_reports.external_layout">
+            <div class="page" style="font-family: Arial !important;">
+                <style>
+                    .fw-900 {
+                        font-weight: 900 !important;
+                    }
+                    .text-justify {
+                        text-align: justify;
+                    }
+                </style>
+                <p class="p-0 m-0 mb-2 text-justify" t-esc="datetime.date.today()" t-options="{'widget': 'date', 'format': 'dd.MM.YYYY'}"/>
+                <t t-if="o.agent_id">
+                    <div class="mb-4">
+                        <p class="p-0 m-0" t-field="o.agent_id"/>
+                        <p class="p-0 m-0" t-if="o.agent_id.street" t-esc="o.agent_id.street"/>
+                        <p class="p-0 m-0" t-if="o.agent_id.street2" t-esc="o.agent_id.street2"/>
+                        <p class="p-0 m-0" t-if="o.agent_id.city" t-esc="o.agent_id.city"/>
+                        <t t-if="o.agent_id.state and o.agent_id.zip">
+                            <p class="p-0 m-0">
+                                <span t-field="o.agent_id.state"/>
+                                -
+                                <span t-esc="o.agent_id.zip"/>
+                            </p>
+                        </t>
+                        <t t-elif="o.agent_id.state and not o.agent_id.zip">
+                            <p class="p-0 m-0" t-field="o.agent_id.state"/>
+                        </t>
+                        <t t-elif="not o.agent_id.state and o.agent_id.zip">
+                            <p class="p-0 m-0" t-field="o.agent_id.zip"/>
+                        </t>
+                        <p class="p-0 m-0" t-if="o.agent_id.country" t-field="o.agent_id.country"/>
+                    </div>
+                </t>
+                <h5 class="fw-900 p-0 m-0 mb-4">Subject: Employment/ Salary Certificate</h5>
+                <p class="p-0 m-0 mb-2 text-justify">Dear Sir,</p>
+                <p class="p-0 m-0 mb-2 text-justify">
+                    This is to certify that <span t-field="o.name"/>, holder of  <span t-field="o.country_id"/> passport number <span class="fw-900" t-field="o.passport_id"/> is working with <span t-field="o.company_id"/> since <span t-field="o.joining_date" t-options="{'widget': 'date', 'format': 'dd/MM/YYYY'}"/> as <span t-field="o.job_id"/>.
+                    His/her monthly gross salary is <span t-if="o.contract_id" t-field="o.contract_id.wage"/>.
+                </p>
+                <p class="p-0 m-0 mb-2 text-justify">
+                    This certificate is issued upon the employee request and <span class="fw-900" t-field="o.company_id"/> or its officers hold no liability for any commitment entered vide this certificate.
+                </p>
+                <p class="p-0 m-0 mb-2 text-justify">Yours sincerely,</p>
+                <p class="p-0 m-0 mt-4 text-justify">For and on behalf of</p>
+                <p class="p-0 m-0 mt-5 pt-5 fw-900">HR Department</p>
+            </div>
+        </t>
+    </template>
+    <template id="report_employement_certificate">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-set="lang" t-value="False"/>
+                <t t-if="o.user_id and o.user_id.partner_id">
+                    <t t-set="lang" t-value="o.user_id.partner_id.sudo().lang"/>
+                </t>
+                <t t-call="fs_giluat_reports.report_employement_certificate_doc" t-lang="lang"/>
+            </t>
+        </t>
+    </template>
+</odoo>

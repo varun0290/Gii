@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_noc_business_trip_doc">
+        <t t-call="fs_giluat_reports.external_layout">
+            <div class="page" style="font-family: Arial !important;">
+                <style>
+                    .fw-900 {
+                        font-weight: 900 !important;
+                    }
+                    .text-justify {
+                        text-align: justify;
+                    }
+                    .bcb {
+                        border-color: black !important;
+                    }
+                </style>
+                <p class="p-0 m-0 mb-5 text-end fw-900">
+                    Date: <span t-esc="datetime.date.today()" t-options="{'widget': 'date', 'format': 'dd.MM.YYYY'}"/>
+                </p>
+                <h5 class="fw-900 p-0 m-0 mb-4">Subject: No Objection Letter - Business Trip</h5>
+                <p class="mb-4">Dear Sirs,</p>
+                <p class="p-0 m-0 mb-2 text-justify">Dear: <span t-field="o.name"/>,</p>
+                <p class="p-0 m-0 mb-2 text-justify">
+                    This is to certify that <span t-field="o.name"/> holder of <span t-field="o.country_id"/> passport with passport number  <span t-field="o.passport_id"/>, is working with <span t-field="o.company_id"/> since <span t-field="o.joining_date" t-options="{'widget': 'date', 'format': 'dd/MM/YYYY'}"/> as <span t-field="o.job_id"/> and drawing a total salary of  <span t-if="o.contract_id" t-field="o.contract_id.wage"/> <span t-if="o.contract_id.wage_type == 'monthly'"> / per month</span>
+                    <span t-if="o.contract_id.wage_type == 'hour'"> / per hour</span>.
+                </p>
+                <p class="p-0 m-0 mb-2 text-justify">
+                    <span t-field="o.name"/> will be travelling for a meeting relating to xxx in the <country/> from dd/mm/yyyy to dd/mm/yyyy. All costs will be settled by <span t-field="o.company_id"/> and <span t-field="o.name"/> will be resuming back to work with us upon the completion of this business trip on dd/mm/yyyy.
+                </p>
+                <p class="p-0 m-0 mb-2 text-justify">
+                    This certificate is issued upon the employee request. <span t-field="o.company_id"/>, its management or its officers hold no liability for any commitment entered vide this certificate.
+                </p>
+                <p class="p-0 m-0 mb-2 text-justify">
+                    In case your office requires any further details for enquiry, please feel free to contact us.
+                </p>
+                <p class="p-0 m-0 mb-2 text-justify fw-900">
+                    Yours sincerely,
+                </p>
+                <p class="p-0 m-0 mt-4">For and on behalf of</p>
+                <p class="p-0 m-0 fw-900" t-field="o.company_id"/>
+                <p class="p-0 m-0 mt-5 pt-5 fw-900">HR Department</p>
+            </div>
+        </t>
+    </template>
+    <template id="report_noc_business_trip">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-set="lang" t-value="False"/>
+                <t t-if="o.user_id and o.user_id.partner_id">
+                    <t t-set="lang" t-value="o.user_id.partner_id.sudo().lang"/>
+                </t>
+                <t t-call="fs_giluat_reports.report_noc_business_trip_doc" t-lang="lang"/>
+            </t>
+        </t>
+    </template>
+</odoo>
