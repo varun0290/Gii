@@ -21,7 +21,7 @@
                 <h5 class="fw-900 p-0 m-0 mb-4">Subject: Probation Period Review - Confirmed</h5>
                 <p class="p-0 m-0 mb-2 text-justify">Dear: <span t-field="o.name"/>,</p>
                 <p class="p-0 m-0 mb-2 text-justify">
-                    Congratulations! I am pleased to confirm that you have successfully completed your (3) or (6) probationary period.
+                    Congratulations! I am pleased to confirm that you have successfully completed your 3 or 6 month probationary period.
                 </p>
                 <p class="p-0 m-0 mb-2 text-justify">
                     <t t-if="is_with_changes">
