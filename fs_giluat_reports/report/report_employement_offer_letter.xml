@@ -2,7 +2,7 @@
 <odoo>
     <template id="report_employement_offer_letter_doc">
         <t t-call="fs_giluat_reports.external_layout">
-            <div class="page" style="font-family: Arial !important;">
+            <div class="page" style="font-size:15px;font-family: Arial !important;">
                 <style>
                     .fw-900 {
                         font-weight: 900 !important;
@@ -50,7 +50,12 @@
                             <table class="pt-2 table table-sm table-borderless">
                                 <tr>
                                     <td class="w-25 px-0 mx-0">Gross Salary:</td>
-                                    <td class="w-75 px-0 mx-0"></td>
+                                    <td class="w-75 px-0 mx-0">
+                                        <span t-esc="o.contract_id.wage + o.contract_id.l10n_ae_housing_allowance + o.contract_id.l10n_ae_other_allowances"
+                                            t-options="{'widget': 'monetary', 'display_currency': o.contract_id.currency_id}" />
+                                        <span t-if="o.contract_id.wage_type == 'monthly'"> / per month</span>
+                                        <span t-if="o.contract_id.wage_type == 'hour'"> / per hour</span>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td class="w-25 px-0 mx-0">Basic Salary:</td>
@@ -100,7 +105,13 @@
                     <tr>
                         <td class="w-25 px-0 mx-0">Probation period:</td>
                         <td class="w-75 px-0 mx-0">
-                            (1,2,3) Months
+                            Six months
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="w-25 px-0 mx-0">Notice Period:</td>
+                        <td class="w-75 px-0 mx-0">
+                            <span t-field="o.contract_id.notice_days"/> / days
                         </td>
                     </tr>
                     <tr>

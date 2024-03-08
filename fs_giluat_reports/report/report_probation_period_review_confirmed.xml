@@ -24,13 +24,14 @@
                     Congratulations! I am pleased to confirm that you have successfully completed your (3) or (6) probationary period.
                 </p>
                 <p class="p-0 m-0 mb-2 text-justify">
-                    As per your employment agreement conditions tied to the successful completion of your probationary period, your monthly total salary has been updated effective <span t-esc="datetime.date.today()" t-options="{'widget': 'date', 'format': 'dd/MM/YYYY'}"/>. The new details are reflected below:
+                    <t t-if="is_with_changes">
+                        As per your employment agreement conditions tied to the successful completion of your probationary period, your monthly total salary has been updated effective <span t-esc="datetime.date.today()" t-options="{'widget': 'date', 'format': 'dd/MM/YYYY'}"/>. The new details are reflected below:
+                    </t>
+                    <t t-else="">
+                        All current conditions within your employment agreement with our firm remain unchanged.
+                    </t>
                 </p>
-                <table class="mx-5 py-3 table table-sm table-borderless" t-if="o.contract_id">
-                    <tr>
-                        <td class="w-50 px-0 mx-0">Gross Salary:</td>
-                        <td class="w-50 px-0 mx-0"></td>
-                    </tr>
+                <table class="mx-5 py-3 table table-sm table-borderless" t-if="is_with_changes and o.contract_id">
                     <tr>
                         <td class="w-50 px-0 mx-0">Basic Salary:</td>
                         <td class="w-50 px-0 mx-0">
@@ -55,9 +56,23 @@
                             <span t-if="o.contract_id.wage_type == 'hour'"> / per hour</span>
                         </td>
                     </tr>
+                    <tr>
+                        <td class="w-50 px-0 mx-0">New Total Gross Salary:</td>
+                        <td class="w-50 px-0 mx-0">
+                            <span t-esc="o.contract_id.wage + o.contract_id.l10n_ae_housing_allowance + o.contract_id.l10n_ae_other_allowances"
+                                t-options="{'widget': 'monetary', 'display_currency': o.contract_id.currency_id}" />
+                            <span t-if="o.contract_id.wage_type == 'monthly'"> / per month</span>
+                            <span t-if="o.contract_id.wage_type == 'hour'"> / per hour</span>
+                        </td>
+                    </tr>
                 </table>
                 <p class="p-0 m-0 mb-2 text-justify">
-                    Congratulations again and we wish you continued success at our firm.
+                    <t t-if="is_with_changes">
+                        Congratulations again and we wish you continued success at our firm.
+                    </t>
+                    <t t-else="">
+                        Congratulations again and we wish you continued success at our company.
+                    </t>
                 </p>
                 <p class="p-0 m-0 mb-2 text-justify">
                     Yours sincerely,
@@ -82,7 +97,19 @@
             </div>
         </t>
     </template>
-    <template id="report_probation_period_review_confirmed">
+    <template id="report_probation_period_review_confirmed_with_changes">
+        <t t-call="web.html_container">
+            <t t-set="is_with_changes" t-value="True"/>
+            <t t-foreach="docs" t-as="o">
+                <t t-set="lang" t-value="False"/>
+                <t t-if="o.user_id and o.user_id.partner_id">
+                    <t t-set="lang" t-value="o.user_id.partner_id.sudo().lang"/>
+                </t>
+                <t t-call="fs_giluat_reports.report_probation_period_review_confirmed_doc" t-lang="lang"/>
+            </t>
+        </t>
+    </template>
+    <template id="report_probation_period_review_confirmed_no_changes">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
                 <t t-set="lang" t-value="False"/>
