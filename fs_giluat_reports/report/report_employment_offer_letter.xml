@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="report_employement_offer_letter_doc">
+    <template id="report_employment_offer_letter_doc">
         <t t-call="fs_giluat_reports.external_layout">
             <div class="page" style="font-size:15px;font-family: Arial !important;">
                 <style>
@@ -157,14 +157,14 @@
             </div>
         </t>
     </template>
-    <template id="report_employement_offer_letter">
+    <template id="report_employment_offer_letter">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
                 <t t-set="lang" t-value="False"/>
                 <t t-if="o.user_id and o.user_id.partner_id">
                     <t t-set="lang" t-value="o.user_id.partner_id.sudo().lang"/>
                 </t>
-                <t t-call="fs_giluat_reports.report_employement_offer_letter_doc" t-lang="lang"/>
+                <t t-call="fs_giluat_reports.report_employment_offer_letter_doc" t-lang="lang"/>
             </t>
         </t>
     </template>

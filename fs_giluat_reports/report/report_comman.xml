@@ -93,22 +93,22 @@
     </record>
 
     <record id="action_employment_certificate" model="ir.actions.report">
-        <field name="name">Employement Certificate</field>
+        <field name="name">Employment Certificate</field>
         <field name="model">hr.employee</field>
         <field name="report_type">qweb-pdf</field>
-        <field name="report_name">fs_giluat_reports.report_employement_certificate</field>
-        <field name="report_file">fs_giluat_reports.report_employement_certificate</field>
+        <field name="report_name">fs_giluat_reports.report_employment_certificate</field>
+        <field name="report_file">fs_giluat_reports.report_employment_certificate</field>
         <field name="paperformat_id" ref="fs_giluat_reports.paperformat_a4_report"/>
         <field name="binding_model_id" ref="hr.model_hr_employee"/>
         <field name="binding_type">report</field>
     </record>
 
     <record id="action_employment_offer_letter" model="ir.actions.report">
-        <field name="name">Employement Offer Letter</field>
+        <field name="name">Employment Offer Letter</field>
         <field name="model">hr.employee</field>
         <field name="report_type">qweb-pdf</field>
-        <field name="report_name">fs_giluat_reports.report_employement_offer_letter</field>
-        <field name="report_file">fs_giluat_reports.report_employement_offer_letter</field>
+        <field name="report_name">fs_giluat_reports.report_employment_offer_letter</field>
+        <field name="report_file">fs_giluat_reports.report_employment_offer_letter</field>
         <field name="paperformat_id" ref="fs_giluat_reports.paperformat_a4_report"/>
         <field name="binding_model_id" ref="hr.model_hr_employee"/>
         <field name="binding_type">report</field>

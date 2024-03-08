@@ -11,8 +11,8 @@
     "category": "Other",
     "data": [
         "report/report_noc_business_trip.xml",
-        "report/report_employement_certificate.xml",
-        "report/report_employement_offer_letter.xml",
+        "report/report_employment_certificate.xml",
+        "report/report_employment_offer_letter.xml",
         "report/report_probation_period_review_confirmed.xml",
         "report/report_probation_period_review_not_confirmed.xml",
         "report/report_employment_certificate_salary_transfer_letter.xml",
