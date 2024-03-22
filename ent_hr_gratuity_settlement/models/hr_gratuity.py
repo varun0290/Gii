@@ -215,7 +215,7 @@ class EmployeeGratuity(models.Model):
             #         )
             #     )
             hr_accounting_configuration_id = contract_sorted[0].gratuity_acc_config_id
-            elif not hr_accounting_configuration_id:
+            if not hr_accounting_configuration_id:
                 raise UserError(
                     _(
                         "No gratuity accounting configuration found "
