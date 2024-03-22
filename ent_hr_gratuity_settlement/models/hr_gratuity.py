@@ -193,27 +193,28 @@ class EmployeeGratuity(models.Model):
                 self.employee_gratuity_years = round(employee_gratuity_years, 2)
 
             gratuity_duration_id = False
-            hr_accounting_configuration_id = self.env[
-                "hr.gratuity.accounting.configuration"
-            ].search(
-                [
-                    ("active", "=", True),
-                    ("config_contract_type", "=", self.employee_contract_type),
-                    "|",
-                    ("gratuity_end_date", ">=", current_date),
-                    ("gratuity_end_date", "=", False),
-                    "|",
-                    ("gratuity_start_date", "<=", current_date),
-                    ("gratuity_start_date", "=", False),
-                ]
-            )
-            if len(hr_accounting_configuration_id) > 1:
-                raise UserError(
-                    _(
-                        "There is a date conflict in Gratuity accounting configuration. "
-                        "Please remove the conflict and try again!"
-                    )
-                )
+            # hr_accounting_configuration_id = self.env[
+            #     "hr.gratuity.accounting.configuration"
+            # ].search(
+            #     [
+            #         ("active", "=", True),
+            #         ("config_contract_type", "=", self.employee_contract_type),
+            #         "|",
+            #         ("gratuity_end_date", ">=", current_date),
+            #         ("gratuity_end_date", "=", False),
+            #         "|",
+            #         ("gratuity_start_date", "<=", current_date),
+            #         ("gratuity_start_date", "=", False),
+            #     ]
+            # )
+            # if len(hr_accounting_configuration_id) > 1:
+            #     raise UserError(
+            #         _(
+            #             "There is a date conflict in Gratuity accounting configuration. "
+            #             "Please remove the conflict and try again!"
+            #         )
+            #     )
+            hr_accounting_configuration_id = contract_sorted[0].gratuity_acc_config_id
             elif not hr_accounting_configuration_id:
                 raise UserError(
                     _(
