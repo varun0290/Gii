@@ -175,7 +175,7 @@ class EmployeeGratuity(models.Model):
 
             if hr_contract_id.date_end:
                 self.employee_contract_type = "limited"
-                employee_working_days = (hr_contract_id.date_end - joining_date).days
+                employee_working_days = (self.end_date - joining_date).days
                 self.total_working_years = employee_working_days / 365
                 self.employee_probation_years = employee_probation_days / 365
                 employee_gratuity_years = (
