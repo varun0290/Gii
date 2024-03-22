@@ -179,7 +179,7 @@ class EmployeeGratuity(models.Model):
                 self.total_working_years = employee_working_days / 365
                 self.employee_probation_years = employee_probation_days / 365
                 employee_gratuity_years = (
-                    employee_working_days - employee_probation_days
+                    (employee_working_days + 1) - employee_probation_days
                 ) / 365
                 self.employee_gratuity_years = employee_gratuity_years
             else:
@@ -188,7 +188,7 @@ class EmployeeGratuity(models.Model):
                 self.total_working_years = employee_working_days / 365
                 self.employee_probation_years = employee_probation_days / 365
                 employee_gratuity_years = (
-                    employee_working_days - employee_probation_days
+                    (employee_working_days + 1) - employee_probation_days
                 ) / 365
                 self.employee_gratuity_years = round(employee_gratuity_years, 2)
 
