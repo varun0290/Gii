@@ -132,7 +132,7 @@ class EmployeeGratuity(models.Model):
     def _onchange_employee_id(self):
         """calculating the gratuity pay based on the contract and gratuity
         configurations"""
-        if self.employee_id.id:
+        if self.employee_id.id and self.end_date:
             current_date = date.today()
             probation_ids = self.env["hr.training"].search(
                 [("employee_id", "=", self.employee_id.id)]
