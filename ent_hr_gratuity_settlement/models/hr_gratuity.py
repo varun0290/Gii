@@ -175,7 +175,7 @@ class EmployeeGratuity(models.Model):
 
             if hr_contract_id.date_end:
                 self.employee_contract_type = "limited"
-                employee_working_days = (hr_contract_id.date_end - joining_date).days
+                employee_working_days = (self.end_date - joining_date).days
                 self.total_working_years = employee_working_days / 365
                 self.employee_probation_years = employee_probation_days / 365
                 employee_gratuity_years = (
@@ -207,20 +207,20 @@ class EmployeeGratuity(models.Model):
                     ("gratuity_start_date", "=", False),
                 ]
             )
-            # if len(hr_accounting_configuration_id) > 1:
-            #     raise UserError(
-            #         _(
-            #             "There is a date conflict in Gratuity accounting configuration. "
-            #             "Please remove the conflict and try again!"
-            #         )
-            #     )
-            # elif not hr_accounting_configuration_id:
-            #     raise UserError(
-            #         _(
-            #             "No gratuity accounting configuration found "
-            #             "or please set proper start date and end date for gratuity configuration!"
-            #         )
-            #     )
+            if len(hr_accounting_configuration_id) > 1:
+                raise UserError(
+                    _(
+                        "There is a date conflict in Gratuity accounting configuration. "
+                        "Please remove the conflict and try again!"
+                    )
+                )
+            elif not hr_accounting_configuration_id:
+                raise UserError(
+                    _(
+                        "No gratuity accounting configuration found "
+                        "or please set proper start date and end date for gratuity configuration!"
+                    )
+                )
             # find configuration ids related to the gratuity accounting configuration
             self.employee_gratuity_configuration = hr_accounting_configuration_id.id
             conf_ids = (
