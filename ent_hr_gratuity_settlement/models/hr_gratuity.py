@@ -128,7 +128,7 @@ class EmployeeGratuity(models.Model):
         vals["name"] = self.env["ir.sequence"].next_by_code("hr.gratuity")
         return super(EmployeeGratuity, self).create(vals)
 
-    @api.onchange("employee_id")
+    @api.onchange("employee_id", "end_date")
     def _onchange_employee_id(self):
         """calculating the gratuity pay based on the contract and gratuity
         configurations"""
