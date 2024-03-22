@@ -154,7 +154,7 @@ class EmployeeGratuity(models.Model):
             for probation in probation_ids:
                 start_date = probation.start_date
                 end_date = probation.end_date
-                employee_probation_days += (end_date - start_date).days + 1
+                employee_probation_days += (end_date - start_date).days
             # get running contract
             hr_contract_id = self.env["hr.contract"].search(
                 [
