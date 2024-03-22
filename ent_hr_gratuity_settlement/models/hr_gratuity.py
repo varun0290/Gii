@@ -334,19 +334,18 @@ class EmployeeGratuity(models.Model):
                                     and employee_gratuity_years
                                 ):
                                     employee_gratuity_years = (
-                                        self.employee_gratuity_years
-                                        - duration.from_year
-                                    )
+                                        self.employee_gratuity_years + 1
+                                    ) - duration.from_year
                                 else:
                                     employee_gratuity_years = (
-                                        self.employee_gratuity_years
+                                        self.employee_gratuity_years + 1
                                     )
                                 if (
                                     self.employee_gratuity_years
                                     <= employee_gratuity_years
                                 ):
                                     employee_gratuity_years = (
-                                        self.employee_gratuity_years
+                                        self.employee_gratuity_years + 1
                                     )
                                 employee_working_days = duration.employee_working_days
                                 employee_gratuity_years = round(
@@ -373,9 +372,9 @@ class EmployeeGratuity(models.Model):
                                         abs(
                                             abs(
                                                 duration.to_year
-                                                - self.employee_gratuity_years
+                                                - (self.employee_gratuity_years + 1)
                                             )
-                                            - self.employee_gratuity_years
+                                            - (self.employee_gratuity_years + 1)
                                         ),
                                         2,
                                     )
@@ -383,7 +382,7 @@ class EmployeeGratuity(models.Model):
                                     employee_gratuity_years = round(
                                         abs(
                                             duration.from_year
-                                            - self.employee_gratuity_years
+                                            - (self.employee_gratuity_years + 1)
                                         ),
                                         2,
                                     )
