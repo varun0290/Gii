@@ -159,13 +159,13 @@ class EmployeeGratuity(models.Model):
             hr_contract_id = self.env["hr.contract"].search(
                 [
                     ("employee_id", "=", self.employee_id.id),
-                    ("state", "=", "open"),
-                ]
+                ],
+                limit=1,
             )
-            if len(hr_contract_id) > 1 or not hr_contract_id:
-                raise UserError(
-                    _("Selected employee have multiple or no running contracts!")
-                )
+            # if len(hr_contract_id) > 1 or not hr_contract_id:
+            #     raise UserError(
+            #         _("Selected employee have multiple or no running contracts!")
+            #     )
 
             self.wage_type = hr_contract_id.wage_type
             if self.wage_type == "hourly":
@@ -199,12 +199,6 @@ class EmployeeGratuity(models.Model):
                 [
                     ("active", "=", True),
                     ("config_contract_type", "=", self.employee_contract_type),
-                    "|",
-                    ("gratuity_end_date", ">=", current_date),
-                    ("gratuity_end_date", "=", False),
-                    "|",
-                    ("gratuity_start_date", "<=", current_date),
-                    ("gratuity_start_date", "=", False),
                 ]
             )
             if len(hr_accounting_configuration_id) > 1:
@@ -214,7 +208,7 @@ class EmployeeGratuity(models.Model):
                         "Please remove the conflict and try again!"
                     )
                 )
-            elif not hr_accounting_configuration_id:
+            if not hr_accounting_configuration_id:
                 raise UserError(
                     _(
                         "No gratuity accounting configuration found "
