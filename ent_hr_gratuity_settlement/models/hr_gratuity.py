@@ -197,9 +197,9 @@ class EmployeeGratuity(models.Model):
                 "hr.gratuity.accounting.configuration"
             ].search(
                 [
-                    ("active", "=", True),
                     ("config_contract_type", "=", self.employee_contract_type),
-                ]
+                ],
+                limit=1,
             )
             if len(hr_accounting_configuration_id) > 1:
                 raise UserError(
