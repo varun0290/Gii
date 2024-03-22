@@ -179,7 +179,7 @@ class EmployeeGratuity(models.Model):
                 self.total_working_years = employee_working_days / 365
                 self.employee_probation_years = employee_probation_days / 365
                 employee_gratuity_years = (
-                    (employee_working_days + 1) - employee_probation_days
+                    employee_working_days - employee_probation_days
                 ) / 365
                 self.employee_gratuity_years = employee_gratuity_years
             else:
@@ -188,7 +188,7 @@ class EmployeeGratuity(models.Model):
                 self.total_working_years = employee_working_days / 365
                 self.employee_probation_years = employee_probation_days / 365
                 employee_gratuity_years = (
-                    (employee_working_days + 1) - employee_probation_days
+                    employee_working_days - employee_probation_days
                 ) / 365
                 self.employee_gratuity_years = round(employee_gratuity_years, 2)
 
@@ -285,8 +285,8 @@ class EmployeeGratuity(models.Model):
                     gratuity_pay_per_year = (
                         working_days_salary * self.employee_gratuity_duration.percentage
                     )
-                    employee_gratuity_amount = (
-                        gratuity_pay_per_year * self.employee_gratuity_years
+                    employee_gratuity_amount = gratuity_pay_per_year * (
+                        self.employee_gratuity_years + 1
                     )
                     self.employee_gratuity_amount = round(employee_gratuity_amount, 2)
                 else:
@@ -304,7 +304,7 @@ class EmployeeGratuity(models.Model):
                     emp_year = 0
                     employee_gratuity_amount = 0.0
                     if len(hr_duration_config_ids) == 1:
-                        employee_gratuity_years = self.employee_gratuity_years
+                        employee_gratuity_years = self.employee_gratuity_years + 1
                         employee_working_days = (
                             hr_duration_config_ids.employee_working_days
                         )
