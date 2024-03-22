@@ -83,6 +83,7 @@ class EmployeeGratuity(models.Model):
         store=True,
         help="Employee gratuity years",
     )
+    end_date = fields.Date(string="End Date", help="Probation end date", required=True)
     employee_basic_salary = fields.Float(
         string="Basic Salary", readonly=True, help="Employee's basic salary."
     )
@@ -174,9 +175,7 @@ class EmployeeGratuity(models.Model):
 
             if hr_contract_id.date_end:
                 self.employee_contract_type = "limited"
-                employee_working_days = (
-                    hr_contract_id.date_end - joining_date
-                ).days + 1
+                employee_working_days = (hr_contract_id.date_end - joining_date).days
                 self.total_working_years = employee_working_days / 365
                 self.employee_probation_years = employee_probation_days / 365
                 employee_gratuity_years = (
@@ -185,7 +184,7 @@ class EmployeeGratuity(models.Model):
                 self.employee_gratuity_years = employee_gratuity_years
             else:
                 self.employee_contract_type = "unlimited"
-                employee_working_days = (current_date - joining_date).days + 1
+                employee_working_days = (self.end_date - joining_date).days
                 self.total_working_years = employee_working_days / 365
                 self.employee_probation_years = employee_probation_days / 365
                 employee_gratuity_years = (

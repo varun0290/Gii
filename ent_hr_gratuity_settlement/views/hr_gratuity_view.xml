@@ -117,6 +117,7 @@
                                 <field name="currency_id" invisible="1"/>
                                 <field name="employee_contract_type" force_save="1"/>
                                 <field name="employee_joining_date"  force_save="1"/>
+                                <field name="end_date"  force_save="1"/>
                                 <field name="wage_type" invisible="1"/>
                                 <label for="employee_basic_salary" string="Basic Salary"/>
                                 <div class="o_row" name="employee_basic_salary">
