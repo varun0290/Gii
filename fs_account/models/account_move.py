@@ -22,6 +22,34 @@ class AccountMove(models.Model):
 
         return super(AccountMove, self).action_post()
 
+    is_petty_cash = fields.Boolean(
+        default=lambda self: self._context.get("is_petty_cash")
+    )
+    is_journal_entry = fields.Boolean(
+        default=lambda self: self._context.get("is_journal_entry")
+    )
+
+    def _search_default_journal(self):
+        journal = super(AccountMove, self)._search_default_journal()
+        if self._context.get("is_journal_entry"):
+            journal = self.env["account.journal"].search(
+                [
+                    ("name", "=", "Miscellaneous Operations"),
+                    ("type", "=", "general"),
+                    ("company_id", "=", self.env.company.id),
+                ],
+                limit=1,
+            )
+        elif self._context.get("is_petty_cash"):
+            journal = self.env["account.journal"].search(
+                [
+                    ("name", "=", "Petty Cash"),
+                    ("type", "=", "general"),
+                    ("company_id", "=", self.env.company.id),
+                ],
+                limit=1,
+            )
+        return journal
 
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
