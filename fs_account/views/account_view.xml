@@ -19,4 +19,17 @@
             </xpath>
         </field>
     </record>
+    <record id="view_account_search" model="ir.ui.view">
+        <field name="name">account.account.search</field>
+        <field name="model">account.account</field>
+        <field name="inherit_id" ref="account.view_account_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="group_id"/>
+            </xpath>
+            <xpath expr="//filter[@name='accounttype']" position="after">
+                <filter string="Group" name="group" domain="" context="{'group_by':'group_id'}"/>
+            </xpath>
+        </field>
+    </record>
 </odoo>
