@@ -6,10 +6,14 @@ from datetime import datetime
 class PurchaseOrder(models.Model):
     _inherit = "purchase.order"
 
+    # approval_level_id = fields.Many2one(
+    #     "sh.purchase.approval.config",
+    #     string="Approval Level",
+    #     compute="compute_approval_level",
+    # )
     approval_level_id = fields.Many2one(
         "sh.purchase.approval.config",
         string="Approval Level",
-        compute="compute_approval_level",
     )
     state = fields.Selection(
         selection_add=[
