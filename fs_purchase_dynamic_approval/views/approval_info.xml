@@ -9,6 +9,7 @@
                 <sheet>
                     <group>
                         <group>
+                            <field name="approve_by"/>
                             <field name="level" />
                             <field name="status" widget="boolean_toggle" />
                         </group>
