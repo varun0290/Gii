@@ -46,6 +46,10 @@
 
             </xpath>
 
+            <xpath expr="//button[@name='button_confirm']" position="attributes">
+                <attribute name="string">Submit For Review</attribute>
+            </xpath>
+
             <xpath expr="//div[@name='reminder']" position="after">
                 <field name="department_ids" widget="many2many_tags"/>
             </xpath>
