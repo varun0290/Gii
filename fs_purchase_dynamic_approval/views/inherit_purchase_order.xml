@@ -46,7 +46,11 @@
 
             </xpath>
 
-            <xpath expr="//button[@name='button_confirm']" position="attributes">
+            <xpath expr="//button[@id='bid_confirm']" position="attributes">
+                <attribute name="string">Submit For Review</attribute>
+            </xpath>
+
+             <xpath expr="//button[@id='draft_confirm']" position="attributes">
                 <attribute name="string">Submit For Review</attribute>
             </xpath>
 
