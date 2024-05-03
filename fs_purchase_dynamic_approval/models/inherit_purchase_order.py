@@ -286,7 +286,7 @@ class PurchaseOrder(models.Model):
                         )
                     self.env["bus.bus"]._sendmany(notifications)
         else:
-            super(PurchaseOrder, self).button_confirm()
+            self.action_send_approval()
 
     def action_send_approval(self):
         template_id = self.env.ref(
