@@ -236,6 +236,8 @@ class PurchaseOrder(models.Model):
                     "reviewer_user_ids": [(6, 0, next_line.user_ids.ids)],
                 }
             )
+        else:
+            self.action_send_approval()
 
     def button_confirm(self):
         template_id = self.env.ref(
