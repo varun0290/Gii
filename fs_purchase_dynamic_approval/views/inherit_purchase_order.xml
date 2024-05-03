@@ -89,12 +89,30 @@
                         <field name="reviewer_info_line" nolabel="1">
                             <tree>
                                 <field name="level" />
+                                <field name="department_ids" invisible="1"/>
                                 <field name="user_ids" widget="many2many_tags"/>
                                 <field name="status" widget="boolean_toggle" readonly="True" />
                                 <field name="reviewed_date" />
                                 <field name="reviewed_by" />
                                 <field name="review_purchase_id" column_invisible="True"/>
                             </tree>
+                            <form>
+                                <sheet>
+                                    <group>
+                                        <group>
+                                            <field name="level" />
+                                        </group>
+                                        <group>
+                                            <field name="department_ids" invisible="1"/>
+                                            <field name="status" widget="boolean_toggle" invisible="1" readonly="True" />
+                                            <field name="reviewed_date" invisible="1"/>
+                                            <field name="reviewed_by" invisible="1" />
+                                            <field name="review_purchase_id" invisible="True"/>
+                                        </group>
+                                        <field name="user_ids"/>
+                                    </group>
+                                </sheet>
+                            </form>
                         </field>
                     </group>
                 </page>
