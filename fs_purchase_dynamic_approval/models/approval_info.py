@@ -12,7 +12,3 @@ class ApprovalInfo(models.Model):
     approval_date = fields.Datetime(string="Approved Date")
     approved_by = fields.Many2one('res.users', string="Approved By")
     purchase_order_id = fields.Many2one('purchase.order')
-    approve_by = fields.Selection(
-        [('group','Group'),('user','User')], string="Approve Process By",
-        default='user'
-    )

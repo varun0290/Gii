@@ -1,4 +1,4 @@
-from odoo import api, fields, tools, models, _, Command
+from odoo import api, fields, tools, models, _
 from odoo.exceptions import UserError, ValidationError
 from datetime import datetime
 
@@ -22,14 +22,14 @@ class PurchaseOrder(models.Model):
             ("purchase",),
         ]
     )
-    level = fields.Integer(string="Next Approval Level")
-    user_ids = fields.Many2many("res.users", string="Users")
-    group_ids = fields.Many2many("res.groups", string="Groups")
+    level = fields.Integer(string="Next Approval Level", readonly=True)
+    user_ids = fields.Many2many("res.users", string="Users", readonly=True)
+    group_ids = fields.Many2many("res.groups", string="Groups", readonly=True)
     is_boolean = fields.Boolean(
         string="Boolean", compute="compute_is_boolean", search="_search_is_boolean"
     )
     approval_info_line = fields.One2many(
-        "sh.approval.info", "purchase_order_id"
+        "sh.approval.info", "purchase_order_id", readonly=True
     )
     rejection_date = fields.Datetime(string="Reject Date", readonly=True)
     reject_by = fields.Many2one("res.users", string="Reject By", readonly=True)
@@ -61,17 +61,7 @@ class PurchaseOrder(models.Model):
                         results.append(po.id)
         return [("id", "in", results)]
 
-    @api.model
-    def create(self, vals):
-        res = super(PurchaseOrder, self).create(vals)
-        if res:
-            if res.approval_level_id and res.approval_info_line:
-                res.write({"state": "waiting_for_approval"})
-        return res
-
-    @api.onchange('approval_level_id')
-    def _onchange_approver_level_id(self):
-        self.approval_info_line = [Command.clear()]
+    def button_confirm(self):
         template_id = self.env.ref(
             "fs_purchase_dynamic_approval.email_template_for_approve_purchase_order"
         )
@@ -92,7 +82,6 @@ class PurchaseOrder(models.Model):
                                 "level": line.level,
                                 "user_ids": False,
                                 "group_ids": [(6, 0, line.group_ids.ids)],
-                                "approve_by": 'group',
                             },
                         )
                     )
@@ -106,7 +95,6 @@ class PurchaseOrder(models.Model):
                                 "level": line.level,
                                 "user_ids": [(6, 0, line.user_ids.ids)],
                                 "group_ids": False,
-                                "approve_by": 'user',
                             },
                         )
                     )
@@ -200,6 +188,8 @@ class PurchaseOrder(models.Model):
                             ]
                         )
                     self.env["bus.bus"]._sendmany(notifications)
+        else:
+            super(PurchaseOrder, self).button_confirm()
 
     @api.depends("amount_untaxed", "amount_total")
     def compute_approval_level(self):
@@ -263,15 +253,20 @@ class PurchaseOrder(models.Model):
             info.approval_date = datetime.now()
             info.approved_by = self.env.user
 
-        line_id = self.approval_info_line.filtered(
-            lambda x: x.level == self.level
+        line_id = self.env["sh.purchase.approval.line"].search(
+            [
+                ("purchase_approval_config_id", "=", self.approval_level_id.id),
+                ("level", "=", self.level),
+            ]
         )
 
-        next_line = self.approval_info_line.filtered(
-            lambda x: x.id > line_id.id
+        next_line = self.env["sh.purchase.approval.line"].search(
+            [
+                ("purchase_approval_config_id", "=", self.approval_level_id.id),
+                ("id", ">", line_id.id),
+            ],
+            limit=1,
         )
-
-        next_line = next_line[0] if len(next_line) > 0 else False
 
         if next_line:
             if next_line.approve_by == "group":
@@ -435,9 +430,8 @@ class PurchaseOrder(models.Model):
                 order.order_line._validate_analytic_distribution()
                 order._add_supplier_to_product()
                 # Deal with double validation process
-                if all([i.status for i in order.approval_info_line]):
-                    if order._approval_allowed():
-                        order.button_approve()
+                if order._approval_allowed():
+                    order.button_approve()
                 else:
                     order.write({"state": "to approve"})
                 if order.partner_id not in order.message_partner_ids:
