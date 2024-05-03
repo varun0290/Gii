@@ -6,39 +6,124 @@ from datetime import datetime
 class PurchaseOrder(models.Model):
     _inherit = "purchase.order"
 
-    # approval_level_id = fields.Many2one(
-    #     "sh.purchase.approval.config",
-    #     string="Approval Level",
-    #     compute="compute_approval_level",
-    # )
     approval_level_id = fields.Many2one(
         "sh.purchase.approval.config",
         string="Approval Level",
+        compute="compute_approval_level",
     )
     state = fields.Selection(
         selection_add=[
+            ("to_review", "To Review"),
             ("waiting_for_approval", "Waiting for Approval"),
             ("reject", "Reject"),
             ("purchase",),
         ]
     )
-    level = fields.Integer(string="Next Approval Level", readonly=True)
-    user_ids = fields.Many2many("res.users", string="Users", readonly=True)
-    group_ids = fields.Many2many("res.groups", string="Groups", readonly=True)
+    level = fields.Integer(
+        string="Next Approval Level",
+        readonly=True,
+        copy=False,
+    )
+    review_level = fields.Integer(
+        string="Next Reviewer Level",
+        readonly=True,
+        copy=False,
+    )
+    user_ids = fields.Many2many(
+        "res.users",
+        string="Users",
+        readonly=True,
+        copy=False,
+    )
+    reviewer_user_ids = fields.Many2many(
+        "res.users",
+        "rel_reviewer_res_users",
+        string="Reviewer",
+        copy=False,
+    )
+    group_ids = fields.Many2many(
+        "res.groups",
+        string="Groups",
+        readonly=True,
+        copy=False,
+    )
     is_boolean = fields.Boolean(
-        string="Boolean", compute="compute_is_boolean", search="_search_is_boolean"
+        string="Boolean",
+        compute="compute_is_boolean",
+        search="_search_is_boolean",
+    )
+    is_skip_boolean = fields.Boolean(
+        string="Boolean",
+        compute="compute_is_skip_boolean",
+        search="_search_is_skip_boolean",
+    )
+    is_reviewer = fields.Boolean(
+        string="Reviewer",
+        compute="compute_is_reviewer",
+        search="_search_is_reviewer",
     )
     approval_info_line = fields.One2many(
-        "sh.approval.info", "purchase_order_id", readonly=True
+        "sh.approval.info",
+        "purchase_order_id",
+        readonly=True,
     )
-    rejection_date = fields.Datetime(string="Reject Date", readonly=True)
-    reject_by = fields.Many2one("res.users", string="Reject By", readonly=True)
-    reject_reason = fields.Char(string="Reject Reason", readonly=True)
+    reviewer_info_line = fields.One2many(
+        "purchase.reviewer",
+        "review_purchase_id",
+        string="Reviewer Info",
+    )
+    rejection_date = fields.Datetime(
+        string="Reject Date",
+        readonly=True,
+    )
+    reject_by = fields.Many2one(
+        "res.users",
+        string="Reject By",
+        readonly=True,
+    )
+    reject_reason = fields.Char(
+        string="Reject Reason",
+        readonly=True,
+    )
     department_ids = fields.Many2many(
         "hr.department",
         related="user_id.department_ids",
         string="Departments",
     )
+
+    def compute_is_skip_boolean(self):
+        line = self.approval_level_id.purchase_approval_line
+        if line and self.env.user.id in line[0].user_ids.ids:
+            self.is_skip_boolean = True
+        else:
+            self.is_skip_boolean = False
+
+    def _search_is_skip_boolean(self, operator, value):
+        results = []
+        if value:
+            po_ids = self.env["purchase.order"].search([])
+            if po_ids:
+                for po in po_ids:
+                    line = po.approval_level_id.purchase_approval_line
+                    if self.env.user.id in line[0].user_ids.ids:
+                        results.append(po.id)
+        return [("id", "in", results)]
+
+    def compute_is_reviewer(self):
+        if self.env.user.id in self.reviewer_user_ids.ids:
+            self.is_reviewer = True
+        else:
+            self.is_reviewer = False
+
+    def _search_is_reviewer(self, operator, value):
+        results = []
+        if value:
+            po_ids = self.env["purchase.order"].search([])
+            if po_ids:
+                for po in po_ids:
+                    if self.env.user.id in po.reviewer_user_ids.ids:
+                        results.append(po.id)
+        return [("id", "in", results)]
 
     def compute_is_boolean(self):
         if self.env.user.id in self.user_ids.ids or any(
@@ -50,7 +135,6 @@ class PurchaseOrder(models.Model):
 
     def _search_is_boolean(self, operator, value):
         results = []
-
         if value:
             po_ids = self.env["purchase.order"].search([])
             if po_ids:
@@ -61,7 +145,150 @@ class PurchaseOrder(models.Model):
                         results.append(po.id)
         return [("id", "in", results)]
 
+    def action_review_done(self):
+        template_id = self.env.ref(
+            "fs_purchase_dynamic_approval.email_template_for_review_purchase_order"
+        )
+
+        info = self.reviewer_info_line.filtered(lambda x: x.level == self.review_level)
+
+        if info:
+            info.status = True
+            info.reviewed_date = datetime.now()
+            info.reviewed_by = self.env.user
+
+        line_id = self.env["purchase.reviewer"].search(
+            [
+                ("level", "=", self.review_level),
+            ],
+            limit=1,
+        )
+
+        next_line = self.env["purchase.reviewer"].search(
+            [
+                ("level", ">", line_id.level),
+            ],
+            limit=1,
+        )
+
+        if next_line:
+            self.write(
+                {
+                    "review_level": next_line.level,
+                    "reviewer_user_ids": [(6, 0, next_line.user_ids.ids)],
+                }
+            )
+
+            if template_id and next_line.user_ids:
+                for user in next_line.user_ids:
+                    template_id.sudo().send_mail(
+                        self.id,
+                        force_send=True,
+                        email_values={
+                            "email_from": self.env.user.email,
+                            "email_to": user.email,
+                        },
+                    )
+
+            notifications = []
+            if next_line.user_ids:
+                for user in next_line.user_ids:
+                    notifications.append(
+                        [
+                            user.partner_id,
+                            (self._cr.dbname, "res.partner", user.partner_id.id),
+                            {
+                                "type": "user_connection",
+                                "title": _("Notification"),
+                                "message": (
+                                    "You have review notification for purchase"
+                                    " order %s"
+                                )
+                                % (self.name),
+                                "sticky": True,
+                                "warning": True,
+                            },
+                        ]
+                    )
+                self.env["bus.bus"]._sendmany(notifications)
+
+        else:
+            self.action_send_approval()
+
+    def action_skip_reviewer(self):
+        line_id = self.env["purchase.reviewer"].search(
+            [
+                ("level", "=", self.review_level),
+            ],
+            limit=1,
+        )
+
+        next_line = self.env["purchase.reviewer"].search(
+            [
+                ("level", ">", line_id.level),
+            ],
+            limit=1,
+        )
+        if next_line:
+            self.write(
+                {
+                    "review_level": next_line.level,
+                    "reviewer_user_ids": [(6, 0, next_line.user_ids.ids)],
+                }
+            )
+
     def button_confirm(self):
+        template_id = self.env.ref(
+            "fs_purchase_dynamic_approval.email_template_for_review_purchase_order"
+        )
+
+        if self.reviewer_info_line:
+            self.write({"state": "to_review"})
+            lines = self.reviewer_info_line
+            if lines:
+                self.write(
+                    {
+                        "review_level": lines[0].level,
+                        "reviewer_user_ids": [(6, 0, lines[0].user_ids.ids)],
+                    }
+                )
+
+                if template_id and lines[0].user_ids:
+                    for user in lines[0].user_ids:
+                        template_id.sudo().send_mail(
+                            self.id,
+                            force_send=True,
+                            email_values={
+                                "email_from": self.env.user.email,
+                                "email_to": user.email,
+                            },
+                        )
+
+                notifications = []
+                if lines[0].user_ids:
+                    for user in lines[0].user_ids:
+                        notifications.append(
+                            [
+                                user.partner_id,
+                                (self._cr.dbname, "res.partner", user.partner_id.id),
+                                {
+                                    "type": "user_connection",
+                                    "title": _("Notification"),
+                                    "message": (
+                                        "You have review notification for purchase"
+                                        " order %s"
+                                    )
+                                    % (self.name),
+                                    "sticky": True,
+                                    "warning": True,
+                                },
+                            ]
+                        )
+                    self.env["bus.bus"]._sendmany(notifications)
+        else:
+            super(PurchaseOrder, self).button_confirm()
+
+    def action_send_approval(self):
         template_id = self.env.ref(
             "fs_purchase_dynamic_approval.email_template_for_approve_purchase_order"
         )
@@ -189,7 +416,16 @@ class PurchaseOrder(models.Model):
                         )
                     self.env["bus.bus"]._sendmany(notifications)
         else:
-            super(PurchaseOrder, self).button_confirm()
+            for order in self:
+                order.order_line._validate_analytic_distribution()
+                order._add_supplier_to_product()
+                # Deal with double validation process
+                if order._approval_allowed():
+                    order.button_approve()
+                else:
+                    order.write({"state": "to approve"})
+                if order.partner_id not in order.message_partner_ids:
+                    order.message_subscribe([order.partner_id.id])
 
     @api.depends("amount_untaxed", "amount_total")
     def compute_approval_level(self):

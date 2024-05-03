@@ -8,10 +8,25 @@
             <field name="partner_ref" position="after">
                 <field name="approval_level_id" />
                 <field name="is_boolean"  invisible="1"/>
+                <field name="is_reviewer"  invisible="1"/>
+                <field name="is_skip_boolean"  invisible="1"/>
 
             </field>
 
             <xpath expr="//header" position="inside">
+                <button
+                    class="oe_highlight"
+                    string="Approve"
+                    type="object"
+                    name="action_review_done"
+                    invisible="state not in ('to_review') or is_reviewer == False" />
+                <button
+                    class="oe_highlight"
+                    string="Skip"
+                    type="object"
+                    name="action_skip_reviewer"
+                    invisible="state not in ('to_review') or is_skip_boolean == False" />
+
                 <button
                     class="oe_highlight"
                     string="Approve"
@@ -60,6 +75,25 @@
                                 <field name="approval_date" />
                                 <field name="approved_by" />
                                 <field name="purchase_order_id" invisible="1" />
+                            </tree>
+                        </field>
+                    </group>
+                </page>
+                <page string="Reviewer Info">
+                    <group>
+                        <group string="Next Reviewer">
+                            <field name="review_level" />
+                            <field name="reviewer_user_ids" widget="many2many_tags" />
+                        </group>
+
+                        <field name="reviewer_info_line" nolabel="1">
+                            <tree>
+                                <field name="level" />
+                                <field name="user_ids" widget="many2many_tags"/>
+                                <field name="status" widget="boolean_toggle" readonly="True" />
+                                <field name="reviewed_date" />
+                                <field name="reviewed_by" />
+                                <field name="review_purchase_id" column_invisible="True"/>
                             </tree>
                         </field>
                     </group>

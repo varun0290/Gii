@@ -6,3 +6,4 @@ from . import res_config_setting
 from . import inherit_purchase_order
 from . import approval_info
 from . import rejection_wizard
+from . import purchase_reviewer
