@@ -160,6 +160,7 @@ class PurchaseOrder(models.Model):
         line_id = self.env["purchase.reviewer"].search(
             [
                 ("level", "=", self.review_level),
+                ("review_purchase_id", "=", self.id),
             ],
             limit=1,
         )
@@ -167,6 +168,7 @@ class PurchaseOrder(models.Model):
         next_line = self.env["purchase.reviewer"].search(
             [
                 ("level", ">", line_id.level),
+                ("review_purchase_id", "=", self.id),
             ],
             limit=1,
         )
@@ -219,6 +221,7 @@ class PurchaseOrder(models.Model):
         line_id = self.env["purchase.reviewer"].search(
             [
                 ("level", "=", self.review_level),
+                ("review_purchase_id", "=", self.id),
             ],
             limit=1,
         )
@@ -226,6 +229,7 @@ class PurchaseOrder(models.Model):
         next_line = self.env["purchase.reviewer"].search(
             [
                 ("level", ">", line_id.level),
+                ("review_purchase_id", "=", self.id),
             ],
             limit=1,
         )
