@@ -686,36 +686,40 @@ class PurchaseOrder(models.Model):
 class PurchaseOrderLine(models.Model):
     _inherit = "purchase.order.line"
 
+    analytic_account_id = fields.Many2one(
+        "account.analytic.account",
+        string="Account Analytic",
+    )
+
+    @api.depends("product_id", "order_id.partner_id", "analytic_account_id")
+    def _compute_analytic_distribution(self):
+        super(SaleOrderLine, self)._compute_analytic_distribution()
+        for rec in self:
+            if rec.analytic_account_id:
+                analytic_account_id = str(rec.analytic_account_id.id)
+                rec.analytic_distribution = {analytic_account_id: 100}
+
     def _prepare_account_move_line(self, move=False):
         results = super(PurchaseOrderLine, self)._prepare_account_move_line(move)
-        if self.analytic_distribution:
-            for account, distribution in self.analytic_distribution.items():
-                analytic_account_id = self.env["account.analytic.account"].search(
-                    [("id", "=", int(account))], limit=1
-                )
-                results.update(
-                    {
-                        "analytic_account_id": analytic_account_id.id,
-                    }
-                )
+        results.update(
+            {
+                "analytic_account_id": self.analytic_account_id.id,
+                "analytic_distribution": {str(self.analytic_account_id.id): 100},
+            }
+        )
         return results
 
-    @api.constrains("analytic_distribution", "price_subtotal", "state")
+    @api.constrains("analytic_account_id", "price_subtotal", "state")
     def _check_analytic_account_budget(self):
         for record in self:
-            if not record.analytic_distribution:
+            if not record.analytic_account_id:
                 continue
-            crossovered_budget_line = False
-            for account, distribution in record.analytic_distribution.items():
-                analytic_account_id = self.env["account.analytic.account"].search(
-                    [("id", "=", int(account))], limit=1
+            crossovered_budget_line = (
+                record.analytic_account_id.crossovered_budget_line.filtered(
+                    lambda line: record.product_id.property_account_expense_id.id
+                    in line.general_budget_id.account_ids.ids
                 )
-                crossovered_budget_line = (
-                    analytic_account_id.crossovered_budget_line.filtered(
-                        lambda line: record.product_id.property_account_expense_id.id
-                        in line.general_budget_id.account_ids.ids
-                    )
-                )
+            )
             if (
                 crossovered_budget_line
                 and (

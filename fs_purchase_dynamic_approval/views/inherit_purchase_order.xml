@@ -58,6 +58,14 @@
                 <field name="department_ids" widget="many2many_tags"/>
             </xpath>
 
+            <xpath expr="//field[@name='order_line']/tree/field[@name='name']" position="after">
+                <field name="analytic_account_id" required="1"/>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']/tree/field[@name='analytic_distribution']" position="attributes">
+                <attribute name="column_invisible">1</attribute>
+            </xpath>
+
             <xpath expr="//notebook//page[@name='purchase_delivery_invoice']" position="after">
                 <page string="Approval Info">
                     <group>

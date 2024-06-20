@@ -427,16 +427,25 @@ class SaleOrder(models.Model):
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
 
+    analytic_account_id = fields.Many2one(
+        "account.analytic.account",
+        string="Account Analytic",
+    )
+
+    @api.depends("product_id", "order_id.partner_id", "analytic_account_id")
+    def _compute_analytic_distribution(self):
+        super(SaleOrderLine, self)._compute_analytic_distribution()
+        for rec in self:
+            if rec.analytic_account_id:
+                analytic_account_id = str(rec.analytic_account_id.id)
+                rec.analytic_distribution = {analytic_account_id: 100}
+
     def _prepare_invoice_line(self, **optional_values):
         results = super(SaleOrderLine, self)._prepare_invoice_line(**optional_values)
-        if self.analytic_distribution:
-            for account, distribution in self.analytic_distribution.items():
-                analytic_account_id = self.env["account.analytic.account"].search(
-                    [("id", "=", int(account))], limit=1
-                )
-                results.update(
-                    {
-                        "analytic_account_id": analytic_account_id.id,
-                    }
-                )
+        results.update(
+            {
+                "analytic_account_id": self.analytic_account_id.id,
+                "analytic_distribution": {str(self.analytic_account_id.id): 100},
+            }
+        )
         return results
