@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from odoo import fields, api, models, _
-from odoo.exceptions import ValidationError
+from odoo import fields, models, api, _, Command
+from odoo.exceptions import UserError, ValidationError
 
 
 class AccountMove(models.Model):
@@ -29,6 +29,11 @@ class AccountMove(models.Model):
     is_journal_entry = fields.Boolean(
         default=lambda self: self._context.get("is_journal_entry")
     )
+    debit_account_id = fields.Many2one(
+        "account.account",
+        string="Debit Account",
+        default=lambda self: self.env.company.deferred_expense_account_id,
+    )
 
     def _search_default_journal(self):
         journal = super(AccountMove, self)._search_default_journal()
@@ -51,6 +56,120 @@ class AccountMove(models.Model):
                 limit=1,
             )
         return journal
+
+    def _generate_deferred_entries(self):
+        """
+        Generates the deferred entries for the invoice.
+        """
+        self.ensure_one()
+        if self.is_entry():
+            raise UserError(
+                _(
+                    "You cannot generate deferred entries for a miscellaneous journal entry."
+                )
+            )
+        assert (
+            not self.deferred_move_ids
+        ), "The deferred entries have already been generated for this document."
+        is_deferred_expense = self.is_purchase_document()
+        deferred_account = (
+            self.debit_account_id
+            if is_deferred_expense
+            else self.company_id.deferred_revenue_account_id
+        )
+        deferred_journal = self.company_id.deferred_journal_id
+        if not deferred_journal:
+            raise UserError(
+                _("Please set the deferred journal in the accounting settings.")
+            )
+        if not deferred_account:
+            raise UserError(
+                _("Please set the deferred accounts in the accounting settings.")
+            )
+
+        for line in self.line_ids.filtered(
+            lambda l: l.deferred_start_date and l.deferred_end_date
+        ):
+            periods = line._get_deferred_periods()
+            if not periods:
+                continue
+
+            ref = _("Deferral of %s", line.move_id.name or "")
+            # Defer the current invoice
+            move_fully_deferred = self.create(
+                {
+                    "move_type": "entry",
+                    "deferred_original_move_ids": [Command.set(line.move_id.ids)],
+                    "journal_id": deferred_journal.id,
+                    "company_id": self.company_id.id,
+                    "partner_id": line.partner_id.id,
+                    "date": line.move_id.date,
+                    "auto_post": "at_date",
+                    "ref": ref,
+                }
+            )
+            # We write the lines after creation, to make sure the `deferred_original_move_ids` is set.
+            # This way we can avoid adding taxes for deferred moves.
+            move_fully_deferred.write(
+                {
+                    "line_ids": [
+                        Command.create(
+                            self.env["account.move.line"]._get_deferred_lines_values(
+                                account.id,
+                                coeff * line.balance,
+                                ref,
+                                line.analytic_distribution,
+                                line,
+                            )
+                        )
+                        for (account, coeff) in [
+                            (line.account_id, -1),
+                            (deferred_account, 1),
+                        ]
+                    ],
+                }
+            )
+
+            # Create the deferred entries for the periods [deferred_start_date, deferred_end_date]
+            deferral_moves = self.create(
+                [
+                    {
+                        "move_type": "entry",
+                        "deferred_original_move_ids": [Command.set(line.move_id.ids)],
+                        "journal_id": deferred_journal.id,
+                        "partner_id": line.partner_id.id,
+                        "date": period[1],
+                        "auto_post": "at_date",
+                        "ref": ref,
+                    }
+                    for period in periods
+                ]
+            )
+            remaining_balance = line.balance
+            for period_index, (period, deferral_move) in enumerate(
+                zip(periods, deferral_moves)
+            ):
+                # For the last deferral move the balance is forced to remaining balance to avoid rounding errors
+                force_balance = (
+                    remaining_balance if period_index == len(periods) - 1 else None
+                )
+                # Same as before, to avoid adding taxes for deferred moves.
+                deferral_move.write(
+                    {
+                        "line_ids": self._get_deferred_lines(
+                            line,
+                            deferred_account,
+                            period,
+                            ref,
+                            force_balance=force_balance,
+                        ),
+                    }
+                )
+                remaining_balance -= deferral_move.line_ids[0].balance
+
+            deferred_moves = move_fully_deferred + deferral_moves
+            line.move_id.deferred_move_ids |= deferred_moves
+            deferred_moves._post(soft=True)
 
 
 class AccountMoveLine(models.Model):

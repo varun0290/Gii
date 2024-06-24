@@ -11,6 +11,7 @@
         "base",
         "account",
         "account_budget",
+        "account_accountant",
     ],
     "data": [
         "views/account_view.xml",
