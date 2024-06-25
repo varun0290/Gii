@@ -693,7 +693,7 @@ class PurchaseOrderLine(models.Model):
 
     @api.depends("product_id", "order_id.partner_id", "analytic_account_id")
     def _compute_analytic_distribution(self):
-        super(SaleOrderLine, self)._compute_analytic_distribution()
+        super(PurchaseOrderLine, self)._compute_analytic_distribution()
         for rec in self:
             if rec.analytic_account_id:
                 analytic_account_id = str(rec.analytic_account_id.id)
