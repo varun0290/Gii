@@ -12,6 +12,7 @@
         "account",
         "account_budget",
         "account_accountant",
+        "hr_expense",
     ],
     "data": [
         "views/account_view.xml",
