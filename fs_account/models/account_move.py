@@ -31,7 +31,7 @@ class AccountMove(models.Model):
     )
     debit_account_id = fields.Many2one(
         "account.account",
-        string="Debit Account",
+        string="Prepaid Debit Account",
         default=lambda self: self.env.company.deferred_expense_account_id,
     )
 
@@ -73,10 +73,16 @@ class AccountMove(models.Model):
         ), "The deferred entries have already been generated for this document."
         is_deferred_expense = self.is_purchase_document()
         deferred_account = (
-            self.debit_account_id
+            self.company_id.deferred_expense_account_id
             if is_deferred_expense
             else self.company_id.deferred_revenue_account_id
         )
+        if self.move_type in ("in_invoice", "in_refund"):
+            deferred_account = (
+                self.debit_account_id
+                if is_deferred_expense
+                else self.company_id.deferred_revenue_account_id
+            )
         deferred_journal = self.company_id.deferred_journal_id
         if not deferred_journal:
             raise UserError(
