@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="account.view_move_form" />
         <field name="arch" type="xml">
             <xpath expr="//div[@name='journal_div']" position="after">
-                <field name="debit_account_id" invisible="move_type not in ('in_invoice', 'in_refund')"/>
+                <field name="prepaid_debit_account_id" invisible="move_type not in ('in_invoice', 'in_refund')"/>
             </xpath>
             <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='analytic_distribution']" position="attributes">
                 <attribute name="column_invisible">parent.move_type != 'entry'</attribute>

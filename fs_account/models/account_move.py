@@ -29,7 +29,7 @@ class AccountMove(models.Model):
     is_journal_entry = fields.Boolean(
         default=lambda self: self._context.get("is_journal_entry")
     )
-    debit_account_id = fields.Many2one(
+    prepaid_debit_account_id = fields.Many2one(
         "account.account",
         string="Prepaid Debit Account",
         default=lambda self: self.env.company.deferred_expense_account_id,
@@ -79,7 +79,7 @@ class AccountMove(models.Model):
         )
         if self.move_type in ("in_invoice", "in_refund"):
             deferred_account = (
-                self.debit_account_id
+                self.prepaid_debit_account_id
                 if is_deferred_expense
                 else self.company_id.deferred_revenue_account_id
             )
