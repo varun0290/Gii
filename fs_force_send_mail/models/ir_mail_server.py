@@ -23,9 +23,10 @@ class IrMailServer(models.Model):
         body_alternative=None,
         subtype_alternative="plain",
     ):
-        smtp = self.env["ir.mail_server"].search(
-            [("company_id", "=", self.env.company.id)], limit=1
-        )
+        # smtp = self.env["ir.mail_server"].search(
+        #     [("company_id", "=", self.env.company.id)], limit=1
+        # )
+        smtp = self.env["ir.mail_server"].search([], limit=1)
         uid = self._context.get("uid")
         user_id = self.env["res.users"].browse(uid)
         email_from = "%s <%s>" % (user_id.name, smtp.smtp_user) or email_from
