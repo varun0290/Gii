@@ -18,7 +18,8 @@
                 <attribute name="column_invisible">parent.move_type != 'entry'</attribute>
             </xpath>
             <xpath expr="//field[@name='line_ids']/tree/field[@name='analytic_distribution']" position="after">
-                <field name="analytic_account_id" required="parent.move_type != 'entry'" column_invisible="parent.move_type == 'entry'"/>
+                <field name="analytic_account_id" required="1"/>
+                <field name="project_id" required="1"/>
             </xpath>
         </field>
     </record>

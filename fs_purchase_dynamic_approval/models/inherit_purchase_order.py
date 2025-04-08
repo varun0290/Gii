@@ -690,6 +690,7 @@ class PurchaseOrderLine(models.Model):
         "account.analytic.account",
         string="Account Analytic",
     )
+    project_id = fields.Many2one("project.project", string="Project")
 
     @api.depends("product_id", "order_id.partner_id", "analytic_account_id")
     def _compute_analytic_distribution(self):

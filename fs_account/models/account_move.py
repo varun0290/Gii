@@ -185,6 +185,7 @@ class AccountMoveLine(models.Model):
         "account.analytic.account",
         string="Account Analytic",
     )
+    project_id = fields.Many2one("project.project", string="Project")
 
     @api.constrains("analytic_account_id", "price_subtotal", "state")
     def _check_analytic_account_budget(self):

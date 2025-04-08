@@ -18,6 +18,8 @@ class CrossoveredBudget(models.Model):
 
     total_balance = fields.Float(compute="_compute_totals", string="Total Balance")
     total_planned_amount = fields.Float(compute="_compute_totals", string="Total Planned Amount")
+    project_ids = fields.Many2many("project.project", "rel_project_project_budget", string="Project")
+    analytic_account_id = fields.Many2one("account.analytic.account", string="Analytic Account")
 
     def _compute_totals(self):
         for cb in self:
