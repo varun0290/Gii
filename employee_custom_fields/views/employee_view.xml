@@ -1,0 +1,145 @@
+<odoo>
+    <record id="view_employee_form_inherit" model="ir.ui.view">
+        <field name="name">hr.employee.form.inherit</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+           <!--  <xpath expr="//field[@name='work_email']" position="attributes">
+                <attribute name="string">Primary Company</attribute>
+            </xpath> -->
+            <xpath expr="//field[@name='work_email']" position="after">
+                <field name="time_in_role" readonly="1"/>
+                <field name="probation_review_date" readonly="1"/>
+                <field name="final_probation_date" readonly="1"/>
+            </xpath>
+            <!-- Add our custom pages structure -->
+            <xpath expr="//notebook" position="inside">
+                <!-- Employment Information Page -->
+                <!-- <page string="Employment Information">
+                    
+                    <group string="Approvers">
+                        <field name="expense_approver_id" string="Expense Approver"/>
+                        <field name="overtime_approver_id" string="Overtime Approver"/>
+                    </group>
+                </page> -->
+                
+                <!-- Documents & Certifications Page -->
+                <page string="Documents">
+                    <group>
+                        <group string="Employee Documents">
+                            <field name="resume" filename="resume_filename"/>
+                            <field name="attested_degree" filename="degree_filename"/>
+                            <field name="spouse_passport" filename="spouse_passport_filename"/>
+                        </group>
+                        <group string="Government Documents">
+                            <field name="emid_number"/>
+                            <field name="emid_issue_date"/>
+                            <field name="emid_expiry_date"/>
+                            <field name="golden_visa_number"/>
+                            <field name="golden_visa_issue_date"/>
+                            <field name="golden_visa_expiry_date"/>
+                            <field name="labor_card_number"/>
+                            <field name="labor_card_issue_date"/>
+                            <field name="labor_card_expiry_date"/>
+                        </group>
+                    </group>
+                </page>
+                
+                <!-- Education & Languages Page -->
+                <page string="Education &amp; Languages">
+                    <group>
+                        <group string="Education">
+                            <field name="education_body"/>
+                            <field name="degree_type"/>
+                            <field name="field_of_study"/>
+                        </group>
+                        <group string="Languages">
+                            <field name="primary_language"/>
+                            <field name="secondary_language"/>
+                            <field name="additional_languages"/>
+                        </group>
+                    </group>
+                </page>
+                
+                <!-- Bank & Payroll Page -->
+                <page string="Bank &amp; Payroll">
+                    <group>
+                        <group string="Bank Information">
+                            <field name="bank_account_id"/>
+                        </group>
+                        <group string="Salary Information">
+                            <field name="employee_code" readonly="1"/>
+                            <field name="total_salary"/>
+                            <field name="basic_salary" readonly="1"/>
+                            <field name="housing_allowance" readonly="1"/>
+                            <field name="transport_allowance" readonly="1"/>
+                            <field name="gosi_employee"/>
+                            <field name="gosi_employer"/>
+                            <field name="gpssa_employee"/>
+                            <field name="gpssa_employer"/>
+                        </group>
+                    </group>
+                </page>
+                
+                <!-- Career Development Page -->
+                <page string="Career Development">
+                    <group>
+                        <group string="Promotions &amp; Transfers">
+                            <field name="previous_job_title"/>
+                            <field name="new_job_title"/>
+                            <field name="previous_department"/>
+                            <field name="new_department"/>
+                            <field name="promotion_date"/>
+                            <field name="promotion_reason"/>
+                            <field name="previous_salary"/>
+                            <field name="new_salary"/>
+                            <field name="previous_supervisor"/>
+                            <field name="new_supervisor"/>
+                            <field name="promotion_comments"/>
+                        </group>
+                        <group string="Performance Management">
+                            <field name="review_date"/>
+                            <field name="reviewer"/>
+                            <field name="review_type"/>
+                            <field name="review_comments"/>
+                            <field name="goals_set"/>
+                            <field name="areas_for_improvement"/>
+                            <field name="review_form" filename="review_form_filename"/>
+                            <field name="performance_score"/>
+                            <field name="agreed_training"/>
+                            <field name="promotion_recommendation"/>
+                            <field name="promotion_narrative"/>
+                            <field name="recommended_job_title"/>
+                            <field name="recommended_salary_increase"/>
+                            <field name="promotion_approval_status"/>
+                            <field name="promotion_approval_date"/>
+                            <field name="promotion_approval_authority"/>
+                            <field name="promotion_notes"/>
+                        </group>
+                    </group>
+                </page>
+                
+                <!-- Learning & Development Page -->
+                <page string="Learning &amp; Development">
+                    <group>
+                        <field name="training_program"/>
+                        <field name="training_provider"/>
+                        <field name="training_start_date"/>
+                        <field name="training_end_date"/>
+                        <field name="training_status"/>
+                        <field name="training_certification"/>
+                        <field name="training_feedback"/>
+                    </group>
+                </page>
+                
+                <!-- System Access Page -->
+                <page string="System Access">
+                    <group>
+                        <field name="biometric_access"/>
+                        <field name="odoo_access_level"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
