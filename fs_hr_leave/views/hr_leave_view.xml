@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<odoo>
+     <record id="fs_hr_leave_view_inherited_form" model="ir.ui.view">
+        <field name="name">fs.hr.leave.view.inherited.form</field>
+        <field name="model">hr.leave</field>
+        <field name="inherit_id" ref="hr_holidays.hr_leave_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="attachment_required" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='supported_attachment_ids']" position="attributes">
+                <attribute name="required">attachment_required</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>
