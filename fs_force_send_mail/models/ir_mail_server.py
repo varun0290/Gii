@@ -13,7 +13,7 @@ class IrMailServer(models.Model):
         body,
         email_cc=None,
         email_bcc=None,
-        reply_to=False,
+        reply_to=None,
         attachments=None,
         message_id=None,
         references=None,
@@ -23,14 +23,18 @@ class IrMailServer(models.Model):
         body_alternative=None,
         subtype_alternative="plain",
     ):
-        # smtp = self.env["ir.mail_server"].search(
-        #     [("company_id", "=", self.env.company.id)], limit=1
-        # )
-        smtp = self.env["ir.mail_server"].search([], limit=1)
-        uid = self._context.get("uid")
-        user_id = self.env["res.users"].browse(uid)
-        email_from = "%s <%s>" % (user_id.name, smtp.smtp_user) or email_from
-        reply_to = "%s <%s>" % (user_id.name, smtp.smtp_user) or email_from
+        # Get the first available mail server
+        mail_server = self.env['ir.mail_server'].search([], limit=1)
+
+        # Get the current user
+        user = self.env.user
+
+        # Only override if we found a mail server and it has smtp_user set
+        if mail_server and mail_server.smtp_user:
+            email_from = f"{user.name} <{mail_server.smtp_user}>"
+            if reply_to is None:
+                reply_to = email_from
+
         return super(IrMailServer, self).build_email(
             email_from=email_from,
             email_to=email_to,
