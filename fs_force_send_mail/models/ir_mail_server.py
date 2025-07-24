@@ -5,6 +5,41 @@ from odoo import api, fields, models, tools, _
 class IrMailServer(models.Model):
     _inherit = "ir.mail_server"
 
+    def _send_email(
+        self,
+        message,
+        mail_server_id=None,
+        smtp_server=None,
+        smtp_port=None,
+        smtp_user=None,
+        smtp_password=None,
+        smtp_encryption=None,
+        smtp_debug=False,
+        smtp_session=None
+    ):
+        """ Override to ensure the From header uses SMTP user when no from_filter is set """
+        # Get the mail server
+        mail_server = None
+        if mail_server_id:
+            mail_server = self.sudo().browse(mail_server_id)
+        elif not smtp_server:
+            mail_server = self.sudo()._find_mail_server(self.env.user.company_id.id)
+
+        # If we have a mail server, ensure the From header is properly set
+        if mail_server:
+            if not mail_server.from_filter and mail_server.smtp_user:
+                message.replace_header('From', mail_server.smtp_user)
+            elif mail_server.smtp_from:
+                message.replace_header('From', mail_server.smtp_from)
+
+        # Call original method
+        return super(IrMailServer, self)._send_email(
+            message, mail_server_id=mail_server_id, smtp_server=smtp_server,
+            smtp_port=smtp_port, smtp_user=smtp_user, smtp_password=smtp_password,
+            smtp_encryption=smtp_encryption, smtp_debug=smtp_debug,
+            smtp_session=smtp_session
+        )
+
     def build_email(
         self,
         email_from,
