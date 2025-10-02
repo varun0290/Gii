@@ -4,7 +4,7 @@
     "category": "other",
     "summary": """Force Send Mail""",
     "license": "AGPL-3",
-    "website": "http://www.asceticbs.com",
+    "website": "http://www.fidobe.com",
     "description": """Force Send Mail""",
     "version": "17.0.1.0",
     "depends": ["base", "mail"],

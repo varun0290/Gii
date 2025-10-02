@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- JV Import Tree View -->
+    <record id="view_jv_import_tree" model="ir.ui.view">
+        <field name="name">jv.import.tree</field>
+        <field name="model">jv.import</field>
+        <field name="arch" type="xml">
+            <tree string="Journal Entry Imports">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="file_name"/>
+                <field name="imported_lines"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- JV Import Form View -->
+    <record id="view_jv_import_form" model="ir.ui.view">
+        <field name="name">jv.import.form</field>
+        <field name="model">jv.import</field>
+        <field name="arch" type="xml">
+            <form string="Journal Entry Import">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,imported,posted"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="date"/>
+                            <field name="file_name"/>
+                        </group>
+                        <group>
+                            <field name="imported_lines"/>
+                            <field name="state"/>
+                        </group>
+                    </group>
+                    <field name="journal_entry_ids">
+                        <tree>
+                            <field name="name"/>
+                            <field name="date"/>
+                            <field name="ref"/>
+                            <field name="state"/>
+                            <field name="apply_to_invoice"/>
+                        </tree>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- JV Import Action -->
+    <record id="action_jv_import" model="ir.actions.act_window">
+        <field name="name">Journal Entry Imports</field>
+        <field name="res_model">jv.import</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Import Wizard Form View -->
+    <record id="view_jv_import_wizard_form" model="ir.ui.view">
+        <field name="name">jv.import.wizard.form</field>
+        <field name="model">jv.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Import Journal Entries">
+                <sheet>
+                    <group>
+                        <group string="File Information">
+                            <field name="file" filename="file_name" required="1"/>
+                            <field name="file_name" readonly="1"/>
+                        </group>
+                        <group string="Import Settings">
+                            <field name="journal_id" required="1"/>
+                            <field name="date_format" required="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_import" string="Import" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Wizard Action -->
+    <record id="action_jv_import_wizard" model="ir.actions.act_window">
+        <field name="name">Import Journal Entries</field>
+        <field name="res_model">jv.import.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'create': False}</field>
+    </record>
+
+    <!-- Menu Items -->
+    <menuitem 
+        id="menu_jv_import_main" 
+        name="Journal Import" 
+        sequence="10"
+        groups="account.group_account_user"/>
+
+     <menuitem 
+        id="menu_jv_import_file" 
+        name="Import File" 
+        parent="menu_jv_import_main"
+        sequence="1"
+        groups="account.group_account_user"/>
+
+    <menuitem 
+        id="menu_jv_import_history" 
+        name="Import History" 
+        parent="menu_jv_import_file" 
+        action="action_jv_import"
+        sequence="1"
+        groups="account.group_account_user"/>
+        
+    <menuitem 
+        id="menu_jv_import_excel" 
+        name="Import from Excel" 
+        parent="menu_jv_import_file" 
+        action="action_jv_import_wizard"
+        sequence="2"
+        groups="account.group_account_user"/>
+
+    <!-- Add import reference to account.move form -->
+    <record id="view_account_move_form_inherit_jv_import" model="ir.ui.view">
+        <field name="name">account.move.form.inherit.jv.import</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='ref']" position="after">
+                <field name="jv_import_id" readonly="1"/>
+                <field name="apply_to_invoice" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Add import reference to account.move tree -->
+    <record id="view_account_move_tree_inherit_jv_import" model="ir.ui.view">
+        <field name="name">account.move.tree.inherit.jv.import</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='ref']" position="after">
+                <field name="jv_import_id" readonly="1"/>
+                <field name="apply_to_invoice" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
