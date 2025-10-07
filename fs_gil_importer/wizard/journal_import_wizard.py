@@ -16,9 +16,9 @@ class JournalImportWizard(models.TransientModel):
     import_type = fields.Selection(
         [
             ('journal_entry', 'Journal Entry'),
-            ("customer_payment", "Customer Payment"),
             ("vendor_payment", "Vendor Payment"),
             ("vendor_bill", "Vendor Bill"),
+            ("customer_payment", "Customer Payment"),
             ("customer_invoice", "Customer Invoice"),
         ],
         string="Import Type",
