@@ -128,9 +128,9 @@ class JournalImportWizard(models.TransientModel):
             if self.import_type == "journal_entry":
                 required_columns = ['date', 'voucher', 'account', 'final_code', 'debit', 'credit', 'narration']
             elif self.import_type == "vendor_payment":
-                required_columns = ['date', 'voucher', 'account', 'debit', 'credit', 'narration']
+                required_columns = ['date', 'voucher', 'account2_name', 'debit', 'credit', 'narration']
             elif self.import_type == "vendor_bill":
-                required_columns = ['date', 'voucher', 'account', 'debit', 'credit', 'narration']
+                required_columns = ['date', 'voucher', 'account2_name', 'account_code', 'debit', 'credit', 'narration']
             missing_columns = [col for col in required_columns if col not in df.columns]
             
             if missing_columns:
@@ -211,7 +211,7 @@ class JournalImportWizard(models.TransientModel):
                 move = self.env['account.move'].create(move_vals)
             moves_created.append(move.id)
             
-            _logger.info(f"Created journal entry: {voucher} with {len(move_lines)} lines")
+            _logger.info(f"Created vendor bill: {voucher} with {len(move_lines)} lines")
         
         return moves_created
 
@@ -244,46 +244,48 @@ class JournalImportWizard(models.TransientModel):
             total_credit = 0
             
             for _, row in voucher_data.iterrows():
-                account_id = self._find_account(row['final_code'])
-                partner_id = self._find_or_create_partner(row['account'])
+                account_id = self._find_account(row['account_code'])
+                partner_id = self._find_or_create_partner(row['account2_name'])
                 tax_ids = self._find_or_tax(row['tax_code_name'])
                 currency_id = self._find_or_currency(row["currency_name"])
-                analytic_account = self._find_or_create_analytic(row['account_analytics'])
+                # analytic_account = self._find_or_create_analytic(row['account_analytics'])
                 
                 debit = float(row['debit']) if pd.notna(row['debit']) else 0.0
                 credit = float(row['credit']) if pd.notna(row['credit']) else 0.0
                 
                 total_debit += debit
                 total_credit += credit
-                
+                invoice_id = self.env['account.move'].search([('name', '=', voucher)], limit=1)
+                if invoice_id:
+                    continue
+
                 move_lines.append((0, 0, {
                     'account_id': account_id,
-                    'partner_id': partner_id,
                     'name': row['narration'] if pd.notna(row['narration']) else '',
-                    'debit': debit,
-                    'credit': credit,
+                    'price_unit': debit or credit,
                     'tax_ids': [(6, 0, tax_ids)],
-                    'analytic_account_id': analytic_account if analytic_account else '',
+                    # 'analytic_account_id': analytic_account if analytic_account else '',
                 }))
             
-            # Create journal entry
-            move_vals = {
-                'move_type': 'entry',
-                'journal_id': journal_id.id,
-                'date': move_date,
-                'name': voucher,
-                'line_ids': move_lines,
-                'currency_id': currency_id if currency_id else '',
-                'apply_to_invoice': row["apply_invoice"] if row.get('apply_invoice') else '',
-            }
-            invoice_id = self.env['account.move'].search([('name', '=', voucher)], limit=1)
-            if invoice_id:
-                invoice_id.write({"invoice_line_ids": move_lines})
-            else:
+                # Create journal entry
+                move_vals = {
+                    'move_type': 'in_invoice',
+                    'partner_id': partner_id,
+                    'journal_id': journal_id.id,
+                    'date': move_date,
+                    'name': voucher,
+                    'invoice_line_ids': move_lines,
+                    'currency_id': currency_id if currency_id else '',
+                    # 'apply_to_invoice': row["apply_invoice"] if row.get('apply_invoice') else '',
+                }
                 move = self.env['account.move'].create(move_vals)
-            moves_created.append(move.id)
+                invoice_id = self.env['account.move'].search([('name', '=', voucher)], limit=1)
+                # if invoice_id:
+                #     invoice_id.write({"invoice_line_ids": move_lines})
+                # else:
+                moves_created.append(move.id)
             
-            _logger.info(f"Created journal entry: {voucher} with {len(move_lines)} lines")
+            _logger.info(f"Created vendor bill: {voucher} with {len(move_lines)} lines")
         
         return moves_created
 
@@ -317,7 +319,7 @@ class JournalImportWizard(models.TransientModel):
             
             for _, row in voucher_data.iterrows():
                 # account_id = self._find_account(row['final_code'])
-                partner_id = self._find_or_create_partner(row['account'])
+                partner_id = self._find_or_create_partner(row['account2_name'])
                 # tax_ids = self._find_or_tax(row['tax_code_name'])
                 currency_id = self._find_or_currency(row["currency_name"])
                 # analytic_account = self._find_or_create_analytic(row['account_analytics'])
@@ -414,6 +416,32 @@ class JournalImportWizard(models.TransientModel):
                     'res_model': 'account.payment',
                     'view_mode': 'tree,form',
                     'domain': [('id', 'in', payment_ids)],
+                    'context': {'create': False},
+                }
+            elif self.import_type == "vendor_bill":
+                # Create journal entries
+                move_ids = self._create_vendor_bill(df, self.journal_id)
+                
+                # Create import record
+                import_record = self.env['journal.import'].create({
+                    'name': f"Import_{fields.Datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                    'file_name': self.file_name,
+                    'imported_lines': len(df),
+                    'state': 'imported',
+                })
+                
+                # Link created moves to import record
+                if move_ids:
+                    moves = self.env['account.move'].browse(move_ids)
+                    moves.write({'journal_import_id': import_record.id})
+               
+                # Return action to show created journal entries
+                return {
+                    'type': 'ir.actions.act_window',
+                    'name': _('Imported Vendor Bills'),
+                    'res_model': 'account.move',
+                    'view_mode': 'tree,form',
+                    'domain': [('id', 'in', move_ids)],
                     'context': {'create': False},
                 }
         except Exception as e:
