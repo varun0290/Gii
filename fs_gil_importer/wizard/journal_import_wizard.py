@@ -248,7 +248,7 @@ class JournalImportWizard(models.TransientModel):
                 partner_id = self._find_or_create_partner(row['account2_name'])
                 tax_ids = self._find_or_tax(row['tax_code_name'])
                 currency_id = self._find_or_currency(row["currency_name"])
-                # analytic_account = self._find_or_create_analytic(row['account_analytics'])
+                analytic_account = self._find_or_create_analytic(row['account_analytics'])
                 
                 debit = float(row['debit']) if pd.notna(row['debit']) else 0.0
                 credit = float(row['credit']) if pd.notna(row['credit']) else 0.0
@@ -264,14 +264,16 @@ class JournalImportWizard(models.TransientModel):
                     'name': row['narration'] if pd.notna(row['narration']) else '',
                     'price_unit': debit or credit,
                     'tax_ids': [(6, 0, tax_ids)],
-                    # 'analytic_account_id': analytic_account if analytic_account else '',
+                    'analytic_account_id': analytic_account if analytic_account else '',
                 }))
             
                 # Create journal entry
                 move_vals = {
                     'move_type': 'in_invoice',
+                    'ref': row['bill_no'] if row.get('bill_no') else '',
                     'partner_id': partner_id,
                     'journal_id': journal_id.id,
+                    'invoice_date': move_date,
                     'date': move_date,
                     'name': voucher,
                     'invoice_line_ids': move_lines,
@@ -279,7 +281,7 @@ class JournalImportWizard(models.TransientModel):
                     # 'apply_to_invoice': row["apply_invoice"] if row.get('apply_invoice') else '',
                 }
                 move = self.env['account.move'].create(move_vals)
-                invoice_id = self.env['account.move'].search([('name', '=', voucher)], limit=1)
+                # invoice_id = self.env['account.move'].search([('name', '=', voucher)], limit=1)
                 # if invoice_id:
                 #     invoice_id.write({"invoice_line_ids": move_lines})
                 # else:
