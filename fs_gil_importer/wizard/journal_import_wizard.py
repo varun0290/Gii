@@ -7,17 +7,26 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
-class JVImportWizard(models.TransientModel):
-    _name = 'jv.import.wizard'
-    _description = 'Journal Entry Import Wizard'
+class JournalImportWizard(models.TransientModel):
+    _name = 'journal.import.wizard'
+    _description = 'Journal Import Wizard'
 
     file = fields.Binary(string='Excel File', required=True)
     file_name = fields.Char(string='File Name')
+    import_type = fields.Selection(
+        [
+            ('journal_entry', 'Journal Entry'),
+            ("vendor_payment", "Vendor Payment"),
+            # ("vendor_bill", "Vendor Bill"),
+            # ("customer_invoice", "Customer Invoice"),
+        ],
+        string="Import Type",
+        default="journal_entry",
+    )
     journal_id = fields.Many2one(
         'account.journal', 
         string='Journal', 
         required=True,
-        domain=[('type', 'in', ['bank', 'cash', 'general'])]
     )
     date_format = fields.Selection([
         ('%m/%d/%Y', 'MM/DD/YYYY'),
@@ -113,11 +122,13 @@ class JVImportWizard(models.TransientModel):
             
             # Clean column names
             df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
-
-            print("\n\n\n #####",  df.columns)
             
             # Ensure required columns exist
-            required_columns = ['date', 'voucher', 'account', 'final_code', 'debit', 'credit', 'narration']
+            required_columns = []
+            if self.import_type == "journal_entry":
+                required_columns = ['date', 'voucher', 'account', 'final_code', 'debit', 'credit', 'narration']
+            elif self.import_type == "vendor_payment":
+                required_columns = ['date', 'voucher', 'account', 'debit', 'credit', 'narration']
             missing_columns = [col for col in required_columns if col not in df.columns]
             
             if missing_columns:
@@ -174,11 +185,11 @@ class JVImportWizard(models.TransientModel):
                 move_lines.append((0, 0, {
                     'account_id': account_id,
                     'partner_id': partner_id,
-                    'name': row['narration'] if pd.notna(row['narration']) else '/',
+                    'name': row['narration'] if pd.notna(row['narration']) else '',
                     'debit': debit,
                     'credit': credit,
                     'tax_ids': [(6, 0, tax_ids)],
-                    'analytic_account_id': analytic_account,
+                    'analytic_account_id': analytic_account if analytic_account else '',
                 }))
             
             # Create journal entry
@@ -188,8 +199,8 @@ class JVImportWizard(models.TransientModel):
                 'date': move_date,
                 'name': voucher,
                 'line_ids': move_lines,
-                'currency_id': currency_id,
-                'apply_to_invoice': row["apply_invoice"],
+                'currency_id': currency_id if currency_id else '',
+                'apply_to_invoice': row["apply_invoice"] if row.get('apply_invoice') else '',
             }
             invoice_id = self.env['account.move'].search([('name', '=', voucher)], limit=1)
             if invoice_id:
@@ -201,6 +212,70 @@ class JVImportWizard(models.TransientModel):
             _logger.info(f"Created journal entry: {voucher} with {len(move_lines)} lines")
         
         return moves_created
+
+    def _create_vendor_payments(self, df, journal_id):
+        """Create vendor payments from DataFrame"""
+        moves_created = []
+        
+        # Group by voucher to create one journal entry per voucher
+        vouchers = df['voucher'].unique()
+        
+        for voucher in vouchers:
+            if pd.isna(voucher):
+                continue
+                
+            voucher_data = df[df['voucher'] == voucher]
+            first_row = voucher_data.iloc[0]
+            
+            # Parse date
+            try:
+                move_date = pd.to_datetime(
+                    first_row['date'], 
+                    format=self.date_format
+                ).date()
+            except:
+                move_date = pd.to_datetime(first_row['date']).date()
+            
+            # Prepare move lines
+            move_lines = []
+            total_debit = 0
+            total_credit = 0
+            
+            for _, row in voucher_data.iterrows():
+                # account_id = self._find_account(row['final_code'])
+                partner_id = self._find_or_create_partner(row['account'])
+                # tax_ids = self._find_or_tax(row['tax_code_name'])
+                currency_id = self._find_or_currency(row["currency_name"])
+                # analytic_account = self._find_or_create_analytic(row['account_analytics'])
+                
+                debit = float(row['debit']) if pd.notna(row['debit']) else 0.0
+                credit = float(row['credit']) if pd.notna(row['credit']) else 0.0
+                
+                total_debit += debit
+                total_credit += credit
+
+                payment_id = self.env["account.payment"].search([('name', '=', voucher)], limit=1)
+                if payment_id:
+                    continue
+                
+                # Create journal entry
+                move_vals = {
+                    'payment_type': 'outbound',
+                    'partner_id': partner_id,
+                    'journal_id': journal_id.id,
+                    'date': move_date,
+                    'name': voucher,
+                    'amount': debit or credit,
+                    'currency_id': currency_id if currency_id else '',
+                    'apply_to_invoice': row["apply_invoice"] if row.get('apply_invoice') else '',
+                }
+                move = self.env['account.payment'].create(move_vals)
+                moves_created.append(move.id)
+            
+            _logger.info(f"Created journal entry: {voucher} with {len(move_lines)} lines")
+        
+        return moves_created
+
 
     def action_import(self):
         """Main import action"""
@@ -214,32 +289,58 @@ class JVImportWizard(models.TransientModel):
             df = self._parse_excel_file(self.file)
             _logger.info(f"Successfully parsed Excel file with {len(df)} rows")
             
-            # Create journal entries
-            move_ids = self._create_journal_entries(df, self.journal_id)
+            if self.import_type == "journal_entry":
+                # Create journal entries
+                move_ids = self._create_journal_entries(df, self.journal_id)
+                
+                # Create import record
+                import_record = self.env['journal.import'].create({
+                    'name': f"Import_{fields.Datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                    'file_name': self.file_name,
+                    'imported_lines': len(df),
+                    'state': 'imported',
+                })
+                
+                # Link created moves to import record
+                if move_ids:
+                    moves = self.env['account.move'].browse(move_ids)
+                    moves.write({'journal_import_id': import_record.id})
+               
+                # Return action to show created journal entries
+                return {
+                    'type': 'ir.actions.act_window',
+                    'name': _('Imported Journal Entries'),
+                    'res_model': 'account.move',
+                    'view_mode': 'tree,form',
+                    'domain': [('id', 'in', move_ids)],
+                    'context': {'create': False},
+                }
+            elif self.import_type == "vendor_payment":
+                # Create vendor payments
+                payment_ids = self._create_vendor_payments(df, self.journal_id)
+                
+                # Create import record
+                import_record = self.env['journal.import'].create({
+                    'name': f"Import_{fields.Datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                    'file_name': self.file_name,
+                    'imported_lines': len(df),
+                    'state': 'imported',
+                })
+                
+                # Link created moves to import record
+                if payment_ids:
+                    payments = self.env['account.payment'].browse(payment_ids)
+                    payments.write({'journal_import_id': import_record.id})
             
-            # Create import record
-            import_record = self.env['jv.import'].create({
-                'name': f"Import_{fields.Datetime.now().strftime('%Y%m%d_%H%M%S')}",
-                'file_name': self.file_name,
-                'imported_lines': len(df),
-                'state': 'imported',
-            })
-            
-            # Link created moves to import record
-            if move_ids:
-                moves = self.env['account.move'].browse(move_ids)
-                moves.write({'jv_import_id': import_record.id})
-            
-            # Return action to show created journal entries
-            return {
-                'type': 'ir.actions.act_window',
-                'name': _('Imported Journal Entries'),
-                'res_model': 'account.move',
-                'view_mode': 'tree,form',
-                'domain': [('id', 'in', move_ids)],
-                'context': {'create': False},
-            }
-            
+                # Return action to show created journal entries
+                return {
+                    'type': 'ir.actions.act_window',
+                    'name': _('Imported Payments'),
+                    'res_model': 'account.payment',
+                    'view_mode': 'tree,form',
+                    'domain': [('id', 'in', payment_ids)],
+                    'context': {'create': False},
+                }
         except Exception as e:
             _logger.error(f"Import error: {str(e)}")
             raise UserError(_(f"Import failed: {str(e)}"))
