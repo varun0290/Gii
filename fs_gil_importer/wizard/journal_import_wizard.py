@@ -17,7 +17,7 @@ class JournalImportWizard(models.TransientModel):
         [
             ('journal_entry', 'Journal Entry'),
             ("vendor_payment", "Vendor Payment"),
-            # ("vendor_bill", "Vendor Bill"),
+            ("vendor_bill", "Vendor Bill"),
             # ("customer_invoice", "Customer Invoice"),
         ],
         string="Import Type",
@@ -129,6 +129,8 @@ class JournalImportWizard(models.TransientModel):
                 required_columns = ['date', 'voucher', 'account', 'final_code', 'debit', 'credit', 'narration']
             elif self.import_type == "vendor_payment":
                 required_columns = ['date', 'voucher', 'account', 'debit', 'credit', 'narration']
+            elif self.import_type == "vendor_bill":
+                required_columns = ['date', 'voucher', 'account', 'debit', 'credit', 'narration']
             missing_columns = [col for col in required_columns if col not in df.columns]
             
             if missing_columns:
@@ -142,6 +144,78 @@ class JournalImportWizard(models.TransientModel):
             raise UserError(_(f"Error reading Excel file: {str(e)}"))
 
     def _create_journal_entries(self, df, journal_id):
+        """Create journal entries from DataFrame"""
+        moves_created = []
+        
+        # Group by voucher to create one journal entry per voucher
+        vouchers = df['voucher'].unique()
+        
+        for voucher in vouchers:
+            if pd.isna(voucher):
+                continue
+                
+            voucher_data = df[df['voucher'] == voucher]
+            first_row = voucher_data.iloc[0]
+            
+            # Parse date
+            try:
+                move_date = pd.to_datetime(
+                    first_row['date'], 
+                    format=self.date_format
+                ).date()
+            except:
+                move_date = pd.to_datetime(first_row['date']).date()
+            
+            # Prepare move lines
+            move_lines = []
+            total_debit = 0
+            total_credit = 0
+            
+            for _, row in voucher_data.iterrows():
+                account_id = self._find_account(row['final_code'])
+                partner_id = self._find_or_create_partner(row['account'])
+                tax_ids = self._find_or_tax(row['tax_code_name'])
+                currency_id = self._find_or_currency(row["currency_name"])
+                analytic_account = self._find_or_create_analytic(row['account_analytics'])
+                
+                debit = float(row['debit']) if pd.notna(row['debit']) else 0.0
+                credit = float(row['credit']) if pd.notna(row['credit']) else 0.0
+                
+                total_debit += debit
+                total_credit += credit
+                
+                move_lines.append((0, 0, {
+                    'account_id': account_id,
+                    'partner_id': partner_id,
+                    'name': row['narration'] if pd.notna(row['narration']) else '',
+                    'debit': debit,
+                    'credit': credit,
+                    'tax_ids': [(6, 0, tax_ids)],
+                    'analytic_account_id': analytic_account if analytic_account else '',
+                }))
+            
+            # Create journal entry
+            move_vals = {
+                'move_type': 'entry',
+                'journal_id': journal_id.id,
+                'date': move_date,
+                'name': voucher,
+                'line_ids': move_lines,
+                'currency_id': currency_id if currency_id else '',
+                'apply_to_invoice': row["apply_invoice"] if row.get('apply_invoice') else '',
+            }
+            invoice_id = self.env['account.move'].search([('name', '=', voucher)], limit=1)
+            if invoice_id:
+                invoice_id.write({"invoice_line_ids": move_lines})
+            else:
+                move = self.env['account.move'].create(move_vals)
+            moves_created.append(move.id)
+            
+            _logger.info(f"Created journal entry: {voucher} with {len(move_lines)} lines")
+        
+        return moves_created
+
+    def _create_vendor_bill(self, df, journal_id):
         """Create journal entries from DataFrame"""
         moves_created = []
         
@@ -254,13 +328,14 @@ class JournalImportWizard(models.TransientModel):
                 total_debit += debit
                 total_credit += credit
 
-                payment_id = self.env["account.payment"].search([('name', '=', voucher)], limit=1)
+                payment_id = self.env["account.payment"].search([('name', '=', voucher), ('company_id', '=', self.env.company.id)], limit=1)
                 if payment_id:
                     continue
                 
                 # Create journal entry
                 move_vals = {
                     'payment_type': 'outbound',
+                    'partner_type': 'supplier',
                     'partner_id': partner_id,
                     'journal_id': journal_id.id,
                     'date': move_date,
