@@ -16,17 +16,24 @@ class JournalImportWizard(models.TransientModel):
     import_type = fields.Selection(
         [
             ('journal_entry', 'Journal Entry'),
+            ("customer_payment", "Customer Payment"),
             ("vendor_payment", "Vendor Payment"),
             ("vendor_bill", "Vendor Bill"),
-            # ("customer_invoice", "Customer Invoice"),
+            ("customer_invoice", "Customer Invoice"),
         ],
         string="Import Type",
         default="journal_entry",
+    )
+    company_id = fields.Many2one(
+        "res.company",
+        string="Company",
+        default=lambda self: self.env.company.id
     )
     journal_id = fields.Many2one(
         'account.journal', 
         string='Journal', 
         required=True,
+        domain="[('company_id', '=', company_id)]"
     )
     date_format = fields.Selection([
         ('%m/%d/%Y', 'MM/DD/YYYY'),
@@ -127,9 +134,9 @@ class JournalImportWizard(models.TransientModel):
             required_columns = []
             if self.import_type == "journal_entry":
                 required_columns = ['date', 'voucher', 'account', 'final_code', 'debit', 'credit', 'narration']
-            elif self.import_type == "vendor_payment":
+            elif self.import_type in ("vendor_payment", 'customer_payment'):
                 required_columns = ['date', 'voucher', 'account2_name', 'debit', 'credit', 'narration']
-            elif self.import_type == "vendor_bill":
+            elif self.import_type in ("vendor_bill", 'customer_invoice'):
                 required_columns = ['date', 'voucher', 'account2_name', 'account_code', 'debit', 'credit', 'narration']
             missing_columns = [col for col in required_columns if col not in df.columns]
             
@@ -211,11 +218,11 @@ class JournalImportWizard(models.TransientModel):
                 move = self.env['account.move'].create(move_vals)
             moves_created.append(move.id)
             
-            _logger.info(f"Created vendor bill: {voucher} with {len(move_lines)} lines")
+            _logger.info(f"Created journal entries: {voucher} with {len(move_lines)} lines")
         
         return moves_created
 
-    def _create_vendor_bill(self, df, journal_id):
+    def _create_invoice_bill(self, df, journal_id):
         """Create journal entries from DataFrame"""
         moves_created = []
         
@@ -291,7 +298,7 @@ class JournalImportWizard(models.TransientModel):
         
         return moves_created
 
-    def _create_vendor_payments(self, df, journal_id):
+    def _create_customer_vendor_payments(self, df, journal_id):
         """Create vendor payments from DataFrame"""
         moves_created = []
         
@@ -394,9 +401,9 @@ class JournalImportWizard(models.TransientModel):
                     'domain': [('id', 'in', move_ids)],
                     'context': {'create': False},
                 }
-            elif self.import_type == "vendor_payment":
+            elif self.import_type in ("vendor_payment", "customer_payment"):
                 # Create vendor payments
-                payment_ids = self._create_vendor_payments(df, self.journal_id)
+                payment_ids = self._create_customer_vendor_payments(df, self.journal_id)
                 
                 # Create import record
                 import_record = self.env['journal.import'].create({
@@ -420,9 +427,9 @@ class JournalImportWizard(models.TransientModel):
                     'domain': [('id', 'in', payment_ids)],
                     'context': {'create': False},
                 }
-            elif self.import_type == "vendor_bill":
+            elif self.import_type in ("vendor_bill", "customer_invoice"):
                 # Create journal entries
-                move_ids = self._create_vendor_bill(df, self.journal_id)
+                move_ids = self._create_invoice_bill(df, self.journal_id)
                 
                 # Create import record
                 import_record = self.env['journal.import'].create({

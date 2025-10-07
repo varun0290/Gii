@@ -83,6 +83,7 @@
                         <group string="File Information">
                             <field name="file" filename="file_name" required="1"/>
                             <field name="file_name" readonly="1"/>
+                            <field name="company_id"/>
                         </group>
                         <group string="Import Settings">
                             <field name="import_type" widget="radio"/>
