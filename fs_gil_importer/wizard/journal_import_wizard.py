@@ -276,7 +276,7 @@ class JournalImportWizard(models.TransientModel):
             
                 # Create journal entry
                 move_vals = {
-                    'move_type': 'in_invoice',
+                    'move_type': 'in_invoice' if self.import_type == 'vendor_bill' else 'out_invoice',
                     'ref': row['bill_no'] if row.get('bill_no') else '',
                     'partner_id': partner_id,
                     'journal_id': journal_id.id,
