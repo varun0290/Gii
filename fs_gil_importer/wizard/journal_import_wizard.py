@@ -215,8 +215,8 @@ class JournalImportWizard(models.TransientModel):
                     'debit': debit,
                     'credit': credit,
                     'tax_ids': [(6, 0, tax_ids)],
-                    'analytic_account_id': analytic_account if analytic_account else '',
-                    'project_id': analytic_project if analytic_project else '',
+                    'analytic_account_id': analytic_account if analytic_account else False,
+                    'project_id': analytic_project if analytic_project else False,
                 }))
             
             # Create journal entry
@@ -294,8 +294,8 @@ class JournalImportWizard(models.TransientModel):
                     'name': row['narration'] if pd.notna(row['narration']) else '',
                     'price_unit': debit or credit,
                     'tax_ids': [(6, 0, tax_ids)],
-                    'analytic_account_id': analytic_account if analytic_account else '',
-                    'project_id': analytic_project if analytic_project else '',
+                    'analytic_account_id': analytic_account if analytic_account else False,
+                    'project_id': analytic_project if analytic_project else False,
                 }))
             
                 # Create journal entry
