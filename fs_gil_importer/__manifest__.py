@@ -8,7 +8,7 @@
     """,
     'author': 'Fidobe Solutions LLC',
     'website': 'https://www.fidobe.com',
-    'depends': ['account', 'base_import'],
+    'depends': ['account', 'base_import', 'project'],
     'data': [
         'security/ir.model.access.csv',
         'views/importer_views.xml',

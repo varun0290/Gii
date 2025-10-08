@@ -41,6 +41,22 @@ class JournalImportWizard(models.TransientModel):
         ('%Y/%m/%d', 'YYYY/MM/DD'),
     ], string='Date Format', default='%m/%d/%Y')
 
+    def _find_or_project(self, analytic_project):
+        """Find or create partner based on name"""
+        if not analytic_project or str(analytic_project).strip() == '':
+            return False
+            
+        analytic_project = self.env['project.project'].search([
+            ('name', '=ilike', str(analytic_project).strip())
+        ], limit=1)
+        if not analytic_project:
+            analytic_project = self.env['project.project'].create({
+                'name': str(analytic_project).strip(),
+            })
+            _logger.info(f"Created project: {analytic_project}")
+            
+        return analytic_project.id
+
     def _find_or_create_analytic(self, analytic_account):
         """Find or create partner based on name"""
         if not analytic_account or str(analytic_account).strip() == '':
@@ -183,7 +199,8 @@ class JournalImportWizard(models.TransientModel):
                 partner_id = self._find_or_create_partner(row['account'])
                 tax_ids = self._find_or_tax(row['tax_code_name'])
                 currency_id = self._find_or_currency(row["currency_name"])
-                analytic_account = self._find_or_create_analytic(row['account_analytics'])
+                analytic_account = self._find_or_create_analytic(row['department'])
+                analytic_project = self._find_or_project(row['project'])
                 
                 debit = float(row['debit']) if pd.notna(row['debit']) else 0.0
                 credit = float(row['credit']) if pd.notna(row['credit']) else 0.0
@@ -199,6 +216,7 @@ class JournalImportWizard(models.TransientModel):
                     'credit': credit,
                     'tax_ids': [(6, 0, tax_ids)],
                     'analytic_account_id': analytic_account if analytic_account else '',
+                    'project_id': analytic_project if analytic_project else '',
                 }))
             
             # Create journal entry
@@ -252,10 +270,15 @@ class JournalImportWizard(models.TransientModel):
             
             for _, row in voucher_data.iterrows():
                 account_id = self._find_account(row['account_code'])
-                partner_id = self._find_or_create_partner(row['account2_name'])
+                partner_id = False
+                if self.import_type == "vendor_bill":
+                    partner_id = self._find_or_create_partner(row['account_name'])
+                else:
+                    partner_id = self._find_or_create_partner(row['account2_name'])
                 tax_ids = self._find_or_tax(row['tax_code_name'])
                 currency_id = self._find_or_currency(row["currency_name"])
-                analytic_account = self._find_or_create_analytic(row['account_analytics'])
+                analytic_account = self._find_or_create_analytic(row['department'])
+                analytic_project = self._find_or_project(row['project'])
                 
                 debit = float(row['debit']) if pd.notna(row['debit']) else 0.0
                 credit = float(row['credit']) if pd.notna(row['credit']) else 0.0
@@ -272,6 +295,7 @@ class JournalImportWizard(models.TransientModel):
                     'price_unit': debit or credit,
                     'tax_ids': [(6, 0, tax_ids)],
                     'analytic_account_id': analytic_account if analytic_account else '',
+                    'project_id': analytic_project if analytic_project else '',
                 }))
             
                 # Create journal entry
