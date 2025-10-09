@@ -300,11 +300,11 @@ class JournalImportWizard(models.TransientModel):
                 analytic_account = self._find_or_create_analytic(row.get('department', ''))
                 analytic_project = self._find_or_project(row.get('project', ''))
                 
-                price_unit = float(row['balance']) if pd.notna(row['balance']) else 0.0
-                # credit = float(row['credit']) if pd.notna(row['credit']) else 0.0
+                debit = float(row['debit']) if pd.notna(row['debit']) else 0.0
+                credit = float(row['credit']) if pd.notna(row['credit']) else 0.0
                 
                 # For invoices, use the non-zero amount as price_unit
-                # price_unit = debit if debit > 0 else credit
+                price_unit = debit if debit > 0 else credit
                 
                 # Prepare analytic distribution
                 # analytic_distribution = {}
