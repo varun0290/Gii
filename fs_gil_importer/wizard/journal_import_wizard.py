@@ -223,6 +223,7 @@ class JournalImportWizard(models.TransientModel):
                     'name': row['narration'] if pd.notna(row['narration']) else '/',
                     'debit': debit,
                     'credit': credit,
+                    'currency_id': currency_id,
                     'tax_ids': tax_ids,
                     'analytic_account_id': analytic_account if analytic_account else False,
                     'project_id': analytic_project if analytic_project else False,
