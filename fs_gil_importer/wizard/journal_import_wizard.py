@@ -221,6 +221,7 @@ class JournalImportWizard(models.TransientModel):
                     'account_id': account_id,
                     'partner_id': partner_id,
                     'name': row['narration'] if pd.notna(row['narration']) else '/',
+                    'amount_currency': debit or credit,
                     'debit': debit,
                     'credit': credit,
                     'currency_id': currency_id,
