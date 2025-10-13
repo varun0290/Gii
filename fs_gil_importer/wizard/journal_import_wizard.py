@@ -293,38 +293,37 @@ class JournalImportWizard(models.TransientModel):
             
             # Prepare invoice lines
             invoice_lines = []
-
             for _, row in voucher_data.iterrows():
                 account_id = self._find_account(row['account_code'])
                 tax_ids = self._find_or_tax(row.get('tax_code_name', ''))
-                analytic_account = self._find_or_create_analytic(row.get('department', ''))
-                analytic_project = self._find_or_project(row.get('project', ''))
+                analytic_account_id = self._find_or_create_analytic(row.get('department', ''))
+                project_id = self._find_or_project(row.get('project', ''))
                 
                 debit = float(row['debit']) if pd.notna(row['debit']) else 0.0
                 credit = float(row['credit']) if pd.notna(row['credit']) else 0.0
                 
+                if self.import_type == "vendor_bill" and not debit:
+                    continue
+                elif self.import_type == "customer_invoice" and not credit:
+                    continue
                 # For invoices, use the non-zero amount as price_unit
                 price_unit = debit if debit > 0 else credit
-                
-                # Prepare analytic distribution
-                # analytic_distribution = {}
-                # if analytic_account:
-                #     analytic_distribution[analytic_account] = 100
-                
+                label = row['narration'] if pd.notna(row['narration']) and str(row['narration']).strip() != '' else '/',
+
                 line_vals = {
-                    'account_id': account_id,
-                    'name': row['narration'] if pd.notna(row['narration']) and row['narration'] != '' else '/',
+                    #'account_id': account_id,
+                    'name': label,
                     'quantity': 1.0,
                     'price_unit': price_unit,
                     'tax_ids': tax_ids,
                 }
                 
-                # Add analytic distribution if available (Odoo 17 uses analytic_distribution)
-                if analytic_account:
-                    line_vals['analytic_account_id'] = analytic_account
+                # Add analytic distribution if available
+                if analytic_account_id:
+                    line_vals['analytic_account_id'] = analytic_account_id
 
-                if analytic_project:
-                    line_vals['project_id'] = analytic_project
+                if project_id:
+                    line_vals['project_id'] = project_id
                 
                 invoice_lines.append((0, 0, line_vals))
             
@@ -336,20 +335,24 @@ class JournalImportWizard(models.TransientModel):
             move_vals = {
                 'move_type': 'in_invoice' if self.import_type == 'vendor_bill' else 'out_invoice',
                 'partner_id': partner_id,
-                'journal_id': journal_id.id,
+                'journal_id': self.journal_id.id,
                 'invoice_date': invoice_date,
                 'date': invoice_date,
                 'name': voucher,
                 'invoice_line_ids': invoice_lines,
             }
+            
             if currency_id:
                 move_vals["currency_id"] = currency_id
+                
             # Add bill reference if available
             if self.import_type == 'vendor_bill' and 'bill_no' in first_row and pd.notna(first_row['bill_no']):
                 move_vals['ref'] = str(first_row['bill_no'])
+                
+            _logger.info(f"Creating {self.import_type} with values: {move_vals}")
+            
             try:
                 move = self.env['account.move'].create(move_vals)
-                move.invoice_line_ids = invoice_lines
                 moves_created.append(move.id)
                 _logger.info(f"✅ Created {self.import_type}: {voucher} with {len(invoice_lines)} lines")
             except Exception as e:
@@ -462,6 +465,7 @@ class JournalImportWizard(models.TransientModel):
                 view_name = _('Imported Payments')
                 
             elif self.import_type in ("vendor_bill", "customer_invoice"):
+                print("\n\n\n df", df, self.journal_id)
                 created_ids = self._create_invoice_bill(df, self.journal_id)
                 model_name = 'account.move'
                 view_name = _('Imported Invoices') if self.import_type == 'customer_invoice' else _('Imported Vendor Bills')
