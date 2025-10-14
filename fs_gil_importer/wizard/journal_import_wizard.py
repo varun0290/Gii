@@ -216,6 +216,21 @@ class JournalImportWizard(models.TransientModel):
                 amount_currency = debit if debit > 0 else credit
                 total_debit += debit
                 total_credit += credit
+                currency = self.env["res.currency"].browse(currency_id)
+                if debit:
+                    debit = currency._convert(
+                        debit,
+                        self.env.company.currency_id,
+                        self.journal_id.company_id,
+                        move_date
+                    )
+                elif credit:
+                    credit = currency._convert(
+                        credit,
+                        self.env.company.currency_id,
+                        self.journal_id.company_id,
+                        move_date
+                    )
                 
                 move_lines.append((0, 0, {
                     'account_id': account_id,
