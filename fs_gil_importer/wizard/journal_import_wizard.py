@@ -213,7 +213,7 @@ class JournalImportWizard(models.TransientModel):
                 
                 debit = float(row['debit']) if pd.notna(row['debit']) else 0.0
                 credit = float(row['credit']) if pd.notna(row['credit']) else 0.0
-                
+                amount_currency = debit if debit > 0 else credit
                 total_debit += debit
                 total_credit += credit
                 
@@ -221,7 +221,7 @@ class JournalImportWizard(models.TransientModel):
                     'account_id': account_id,
                     'partner_id': partner_id,
                     'name': row['narration'] if pd.notna(row['narration']) else '/',
-                    'amount_currency': debit if debit > 0 else credit,
+                    'amount_currency': -(amount_currency) if credit else abs(amount_currency),
                     'debit': debit,
                     'credit': credit,
                     'currency_id': currency_id,
@@ -239,7 +239,7 @@ class JournalImportWizard(models.TransientModel):
                 'line_ids': move_lines,
                 'currency_id': currency_id,
             }
-            
+
             move = self.env['account.move'].create(move_vals)
             moves_created.append(move.id)
             
