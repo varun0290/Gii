@@ -25,6 +25,22 @@
                     <field name="state" widget="statusbar" statusbar_visible="draft,imported,posted"/>
                 </header>
                 <sheet>
+                    <div class="oe_button_box d-flex flex-wrap mb-3" name="button_box">
+                        <button
+                            name="action_view_journal_entries"
+                            type="object"
+                            string="Journal Entries"
+                            icon="fa-bars"
+                            class="oe_stat_button">
+                        </button>
+                        <button
+                            name="action_view_payments"
+                            type="object"
+                            string="Payments"
+                            icon="fa-bars"
+                            class="oe_stat_button">
+                        </button>
+                    </div>
                     <group>
                         <group>
                             <field name="name"/>

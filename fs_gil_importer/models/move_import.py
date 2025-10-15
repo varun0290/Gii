@@ -32,6 +32,24 @@ class JournalImport(models.Model):
         string='Payments'
     )
 
+    def action_view_journal_entries(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Journal Entries',
+            'res_model': 'account.move',
+            'view_mode': 'list,form',
+            'domain': [('id', 'in', self.move_ids.ids)],
+        }
+
+    def action_view_payments(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Payments',
+            'res_model': 'account.payment',
+            'view_mode': 'list,form',
+            'domain': [('id', 'in', self.account_payment_ids.ids)],
+        }
+
 
 class AccountMove(models.Model):
     _inherit = 'account.move'

@@ -311,7 +311,6 @@ class JournalImportWizard(models.TransientModel):
             # Prepare invoice lines
             invoice_lines = []
             for _, row in voucher_data.iterrows():
-                account_id = self._find_account(row['account_code'])
                 tax_ids = self._find_or_tax(row.get('tax_code_name', ''))
                 analytic_account_id = self._find_or_create_analytic(row.get('account_analytics', ''))
                 project_id = self._find_or_project(row.get('project', ''))
@@ -324,6 +323,7 @@ class JournalImportWizard(models.TransientModel):
                 elif self.import_type == "customer_invoice" and not credit:
                     continue
                 # For invoices, use the non-zero amount as price_unit
+                account_id = self._find_account(row['account_code'])
                 price_unit = debit if debit > 0 else credit
                 label = row['narration'] if pd.notna(row['narration']) and str(row['narration']).strip() != '' else '/',
 
