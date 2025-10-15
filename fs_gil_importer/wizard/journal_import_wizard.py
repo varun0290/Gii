@@ -126,10 +126,21 @@ class JournalImportWizard(models.TransientModel):
 
     def _find_account(self, account_code):
         """Find account by code"""
-        if not account_code or pd.isna(account_code):
-            raise UserError(_(f"Account code is required but missing."))
-            
-        account_code_clean = str(account_code).strip()
+        if not account_code or pd.isna(account_code) or str(account_code).strip() == '':
+            raise UserError(_("Account code is required but missing."))
+        
+        # Clean and convert account code
+        try:
+            # Handle both string and float inputs
+            account_code_clean = str(account_code).strip()
+            # Remove .0 if present from float conversion
+            if account_code_clean.endswith('.0'):
+                account_code_clean = account_code_clean[:-2]
+            # Convert to integer string
+            account_code_clean = str(int(float(account_code_clean)))
+        except (ValueError, TypeError):
+            raise UserError(_(f"Invalid account code format: {account_code}"))
+        
         account = self.env['account.account'].search([
             ('code', '=', account_code_clean)
         ], limit=1)
@@ -169,11 +180,34 @@ class JournalImportWizard(models.TransientModel):
                 
             # Fill NaN values with empty string or 0
             df = df.fillna({'debit': 0.0, 'credit': 0.0, 'narration': ''})
+            
+            # Convert account codes from float to integer strings
+            if 'final_code' in df.columns:
+                df['final_code'] = df['final_code'].apply(
+                    lambda x: str(int(float(x))) if pd.notna(x) and str(x).strip() != '' else ''
+                )
+            if 'account_code' in df.columns:
+                df['account_code'] = df['account_code'].apply(
+                    lambda x: str(int(float(x))) if pd.notna(x) and str(x).strip() != '' else ''
+                )
                 
             return df
             
         except Exception as e:
             raise UserError(_(f"Error reading Excel file: {str(e)}"))
+
+    def _check_account(self, voucher, acc_id):
+        if self.import_type == "vendor_bill":
+            # For vendor bills, check debit entries (expense/liability accounts should be used)
+            if acc_id.account_type in ['asset_receivable', 'liability_payable']:
+                error_msg = "Vendor Bill '%s' has receivable or payable account '%s' (%s) in a debit entry. Please use expense or liability accounts instead." % (voucher, acc_id.name, acc_id.code)
+                raise UserError(_(error_msg))
+                
+        elif self.import_type == "customer_invoice":
+            # For customer invoices, check credit entries (income/asset accounts should be used)
+            if acc_id.account_type in ['asset_receivable', 'liability_payable']:
+                error_msg = "Customer Invoice '%s' has receivable or payable account '%s' (%s) in a credit entry. Please use income or asset accounts instead." % (voucher, acc_id.name, acc_id.code)
+                raise UserError(_(error_msg))
 
     def _create_journal_entries(self, df, journal_id):
         """Create journal entries from DataFrame"""
@@ -304,31 +338,43 @@ class JournalImportWizard(models.TransientModel):
                 partner_id = self._find_or_create_partner(first_row.get('customer', ''))
             
             if not partner_id:
-                raise UserError(_(f"Partner is required for {self.import_type} but not found in row."))
+                raise UserError(_("Partner is required for %s but not found in row.") % self.import_type)
 
             currency_id = self._find_or_currency(first_row.get("currency_name", ""))
             
             # Prepare invoice lines
             invoice_lines = []
             for _, row in voucher_data.iterrows():
-                debit = float(row['debit']) if pd.notna(row['debit']) else 0.0
-                credit = float(row['credit']) if pd.notna(row['credit']) else 0.0
-                
-                if self.import_type == "vendor_bill" and not debit:
-                    continue
-                elif self.import_type == "customer_invoice" and not credit:
-                    continue
-                # For invoices, use the non-zero amount as price_unit
                 account_id = self._find_account(row['account_code'])
                 tax_ids = self._find_or_tax(row.get('tax_code_name', ''))
                 analytic_account_id = self._find_or_create_analytic(row.get('account_analytics', ''))
                 project_id = self._find_or_project(row.get('project', ''))
+
+                acc_id = self.env["account.account"].browse(account_id)
+                debit = float(row['debit']) if pd.notna(row['debit']) else 0.0
+                credit = float(row['credit']) if pd.notna(row['credit']) else 0.0
+                
+                # Check for invalid account types in invoice lines
+                if self.import_type == "vendor_bill" and debit > 0:
+                    self._check_account(voucher, acc_id)
+                elif self.import_type == "customer_invoice" and credit > 0:
+                    # For customer invoices, check credit entries (income/asset accounts should be used)
+                    self._check_account(voucher, acc_id)
+
+                # Skip zero-amount lines for the appropriate import type
+                if self.import_type == "vendor_bill" and debit == 0:
+                    continue
+                elif self.import_type == "customer_invoice" and credit == 0:
+                    continue
+
+                # For invoices, use the non-zero amount as price_unit
                 price_unit = debit if debit > 0 else credit
-                label = row['narration'] if pd.notna(row['narration']) and str(row['narration']).strip() != '' else '/',
+                # FIX: Remove the trailing comma that was making this a tuple
+                label = row['narration'] if pd.notna(row['narration']) and str(row['narration']).strip() != '' else '/'
 
                 line_vals = {
                     'account_id': account_id,
-                    'name': label,
+                    'name': label,  # This was receiving a tuple before, causing issues
                     'quantity': 1.0,
                     'price_unit': price_unit,
                     'tax_ids': tax_ids,
@@ -366,14 +412,14 @@ class JournalImportWizard(models.TransientModel):
                 move_vals['ref'] = str(first_row['bill_no'])
                 
             _logger.info(f"Creating {self.import_type} with values: {move_vals}")
-            
+
             try:
                 move = self.env['account.move'].create(move_vals)
                 moves_created.append(move.id)
                 _logger.info(f"✅ Created {self.import_type}: {voucher} with {len(invoice_lines)} lines")
             except Exception as e:
                 _logger.error(f"❌ Failed to create {self.import_type} {voucher}: {str(e)}")
-                raise UserError(_(f"Failed to create {self.import_type}: {str(e)}"))
+                raise UserError(_("Failed to create %s: %s") % (self.import_type, str(e)))
         
         return moves_created
 
@@ -476,15 +522,12 @@ class JournalImportWizard(models.TransientModel):
             if self.import_type == "journal_entry":
                 created_ids = self._create_journal_entries(df, self.journal_id)
                 model_name = 'account.move'
-                view_name = _('Imported Journal Entries')
-                
+                view_name = _('Imported Journal Entries')    
             elif self.import_type in ("vendor_payment", "customer_payment"):
                 created_ids = self._create_customer_vendor_payments(df, self.journal_id)
                 model_name = 'account.payment'
-                view_name = _('Imported Payments')
-                
+                view_name = _('Imported Payments')   
             elif self.import_type in ("vendor_bill", "customer_invoice"):
-                print("\n\n\n df", df, self.journal_id)
                 created_ids = self._create_invoice_bill(df, self.journal_id)
                 model_name = 'account.move'
                 view_name = _('Imported Invoices') if self.import_type == 'customer_invoice' else _('Imported Vendor Bills')
@@ -493,7 +536,6 @@ class JournalImportWizard(models.TransientModel):
             import_record = self.env['journal.import'].create({
                 'name': f"Import_{fields.Datetime.now().strftime('%Y%m%d_%H%M%S')}",
                 'file_name': self.file_name,
-                # 'import_type': self.import_type,
                 'imported_lines': len(df),
                 'state': 'imported',
             })
