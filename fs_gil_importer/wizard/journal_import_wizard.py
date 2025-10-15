@@ -208,7 +208,7 @@ class JournalImportWizard(models.TransientModel):
                 partner_id = self._find_or_create_partner(row['account'])
                 tax_ids = self._find_or_tax(row.get('tax_code_name', ''))
                 currency_id = self._find_or_currency(row.get("currency_name", ""))
-                analytic_account = self._find_or_create_analytic(row.get('department', ''))
+                analytic_account = self._find_or_create_analytic(row.get('analytic_accounts', ''))
                 analytic_project = self._find_or_project(row.get('project', ''))
                 
                 debit = float(row['debit']) if pd.notna(row['debit']) else 0.0
@@ -313,7 +313,7 @@ class JournalImportWizard(models.TransientModel):
             for _, row in voucher_data.iterrows():
                 account_id = self._find_account(row['account_code'])
                 tax_ids = self._find_or_tax(row.get('tax_code_name', ''))
-                analytic_account_id = self._find_or_create_analytic(row.get('department', ''))
+                analytic_account_id = self._find_or_create_analytic(row.get('analytic_accounts', ''))
                 project_id = self._find_or_project(row.get('project', ''))
                 
                 debit = float(row['debit']) if pd.notna(row['debit']) else 0.0
