@@ -417,6 +417,7 @@ class JournalImportWizard(models.TransientModel):
             if not partner_id:
                 raise UserError(_(f"Partner is required for payment but not found for voucher {voucher}"))
 
+            apply_invoice = self._find_or_currency(first_row.get("apply_invoice", ""))
             currency_id = self._find_or_currency(first_row.get("currency_name", ""))
             # Calculate amount from first row (assuming one payment per voucher)
             debit = float(first_row['debit']) if pd.notna(first_row['debit']) else 0.0
@@ -441,6 +442,7 @@ class JournalImportWizard(models.TransientModel):
                 'date': payment_date,
                 'amount': amount,
                 'name': voucher,
+                'apply_to_invoice': apply_invoice,
             }
             
             # Handle invoice linking if specified
