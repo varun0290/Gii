@@ -328,7 +328,7 @@ class JournalImportWizard(models.TransientModel):
                 label = row['narration'] if pd.notna(row['narration']) and str(row['narration']).strip() != '' else '/',
 
                 line_vals = {
-                    #'account_id': account_id,
+                    'account_id': account_id,
                     'name': label,
                     'quantity': 1.0,
                     'price_unit': price_unit,
