@@ -301,7 +301,7 @@ class JournalImportWizard(models.TransientModel):
             if self.import_type == "vendor_bill":
                 partner_id = self._find_or_create_partner(first_row.get('account_name', first_row.get('account2_name', '')))
             else:  # customer_invoice
-                partner_id = self._find_or_create_partner(first_row.get('account2_name', ''))
+                partner_id = self._find_or_create_partner(first_row.get('customer', ''))
             
             if not partner_id:
                 raise UserError(_(f"Partner is required for {self.import_type} but not found in row."))
