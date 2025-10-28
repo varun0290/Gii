@@ -10,9 +10,9 @@ class MailMeassge(models.Model):
     @api.model_create_multi
     def create(self, values_list):
         res = super(MailMeassge, self).create(values_list)
-        mail_server = self.env['ir.mail_server'].search([], limit=1)
+        mail_server = self.env['ir.mail_server'].sudo().search([], limit=1)
         if mail_server:
-        	res.write({"email_from": mail_server.smtp_user})
+        	res.write({"email_from": mail_server.sudo().smtp_user})
         return res
 
 
