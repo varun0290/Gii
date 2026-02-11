@@ -6,9 +6,12 @@ class HolidaysAllocation(models.Model):
     _inherit = 'hr.leave.allocation'
 
     @api.constrains('holiday_status_id', 'number_of_days_display', 'date_from', 'date_to')
-    def check_zero_allocation(self):
+    def fs_check_zero_allocation(self):
         for record in self:
-            if not record.holiday_status_id.allow_zero_allocation and (
-            	record.number_of_days_display < 0 or record.number_of_days_display == 0
-            ):
-                raise UserError(_("Zero allocation is not allowed"))
+            # Skip validation if zero allocation is allowed
+            if record.holiday_status_id.allow_zero_allocation:
+                return
+
+        # Check for zero or negative allocation
+        if record.number_of_days_display <= 0:
+            raise UserError(_("Zero allocation is not allowed"))
