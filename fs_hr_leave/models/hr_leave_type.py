@@ -18,7 +18,7 @@ class HolidaysType(models.Model):
     _inherit = "hr.leave.type"
 
     is_sick_leave = fields.Boolean(string="Supporting Document Mandatory")
-    # hide_carry_forward_on_dashboard = fields.Boolean(string="Hide Carry Forward on Dashboard")
+    hide_carry_forward_on_dashboard = fields.Boolean(string="Hide Carry Forward on Dashboard")
 
     def get_allocation_data(self, employees, target_date=None):
         allocation_data = defaultdict(list)
