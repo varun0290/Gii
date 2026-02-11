@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="hr_contract_view_form_inherit_fs" model="ir.ui.view">
+        <field name="name">hr.contract.view.form.inherit.fs</field>
+        <field name="model">hr.contract</field>
+        <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
+        <field name="arch" type="xml">
+            
+            <!-- Replace Header -->
+            <xpath expr="//header" position="replace">
+                <header>
+                    <button name="action_submit_for_approval" string="Submit for Approval" type="object" invisible="state != 'draft'" class="oe_highlight"/>
+                    <button name="action_approve_hr" string="Approve (HR)" type="object" invisible="state != 'wait_hr'" class="oe_highlight" groups="fs_hr_contract.group_head_of_hr"/>
+                    <button name="action_approve_finance" string="Approve (Finance)" type="object" invisible="state != 'wait_finance'" class="oe_highlight" groups="fs_hr_contract.group_vp_finance"/>
+                    <button name="action_reject" string="Reject" type="object" invisible="state not in ('wait_hr', 'wait_finance')" groups="fs_hr_contract.group_head_of_hr,fs_hr_contract.group_vp_finance"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,wait_hr,wait_finance,open,close,cancel"/>
+                </header>
+            </xpath>
+
+            <!-- Add Employee ID and Probation -->
+            <xpath expr="//field[@name='employee_id']" position="after">
+                <field name="employee_id_no"/>
+                <field name="probation_period_months"/>
+            </xpath>
+
+            <!-- Add Tabs -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Salary Structure" name="salary_structure">
+                    <group>
+                        <group string="1. Earnings">
+                            <field name="vehicle_allowance"/>
+                            <field name="fixed_telephone_allowance"/>
+                            <field name="fixed_vacation_ticket_allowance"/>
+                            <field name="leave_travel_allowance"/>
+                            <field name="medical_insurance_allowance"/>
+                            <field name="education_other_allowance"/>
+                            <field name="total_earnings" decoration-bf="1"/>
+                        </group>
+                        <group string="2. Additions">
+                            <field name="arrears"/>
+                            <field name="leave_encashment"/>
+                            <field name="reimbursement"/>
+                            <field name="airfare"/>
+                            <field name="other_additions"/>
+                            <field name="total_additions" decoration-bf="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="3. Deductions">
+                            <field name="leave_deduction"/>
+                            <field name="late_coming_deduction"/>
+                            <field name="absent_days_deduction"/>
+                            <field name="loan_repayment"/>
+                            <field name="gosi_deduction"/>
+                            <field name="other_deductions"/>
+                            <field name="vehicle_allowance_deduction"/>
+                            <field name="recurring_deductions"/>
+                            <field name="total_deductions" decoration-bf="1"/>
+                        </group>
+                        <group string="4. Summary">
+                            <field name="gross_salary" decoration-bf="1"/>
+                            <field name="net_salary" decoration-bf="1"/>
+                            <field name="total_cash_compensation" decoration-bf="1"/>
+                            <separator string="5. Pension" colspan="2"/>
+                            <field name="employer_pension_contribution"/>
+                            <field name="employee_pension_contribution"/>
+                        </group>
+                    </group>
+                </page>
+                <page string="Increment / Bonus" name="increment_bonus">
+                    <group>
+                        <group>
+                            <field name="bonus"/>
+                            <field name="special_increment"/>
+                            <field name="promotion_adjustment"/>
+                        </group>
+                        <group>
+                            <field name="performance_incentives"/>
+                            <field name="one_time_rewards"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

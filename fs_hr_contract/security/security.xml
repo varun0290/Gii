@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="group_head_of_hr" model="res.groups">
+        <field name="name">Head of HR</field>
+        <field name="category_id" ref="base.module_category_human_resources_contracts"/>
+    </record>
+
+    <record id="group_vp_finance" model="res.groups">
+        <field name="name">VP Finance</field>
+        <field name="category_id" ref="base.module_category_accounting_accounting"/>
+    </record>
+</odoo>
