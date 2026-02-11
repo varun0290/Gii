@@ -18,7 +18,7 @@ class HolidaysType(models.Model):
     _inherit = "hr.leave.type"
 
     is_sick_leave = fields.Boolean(string="Supporting Document Mandatory")
-    hide_carry_forward_on_dashboard = fields.Boolean(string="Hide Carry Forward on Dashboard")
+    show_carry_forward_on_dashboard = fields.Boolean(string="Show Carry Forward on Dashboard")
 
     def get_allocation_data(self, employees, target_date=None):
         allocation_data = defaultdict(list)
@@ -83,7 +83,7 @@ class HolidaysType(models.Model):
                 allocations_with_remaining_leaves = self.env['hr.leave.allocation']
                 for allocation, data in allocations_leaves_consumed[employee][leave_type].items():
                     # We only need the allocation that are valid at the given date
-                    if allocation and allocation.is_carry_forward and leave_type.hide_carry_forward_on_dashboard:
+                    if allocation and not leave_type.show_carry_forward_on_dashboard:
                         continue
                     if allocation:
                         today = fields.Date.today()
@@ -140,7 +140,7 @@ class HolidaysType(models.Model):
                     'closest_allocation_duration': closest_allocation_duration,
                     'holds_changes': holds_changes,
                 })
-                if not self.env.context.get('from_dashboard', False) or lt_info[1]['max_leaves'] or (leave_type.hide_carry_forward_on_dashboard and lt_info[1]['virtual_remaining_leaves'] == 0):
+                if not self.env.context.get('from_dashboard', False) or lt_info[1]['max_leaves'] or (leave_type.show_carry_forward_on_dashboard and lt_info[1]['virtual_remaining_leaves'] == 0):
                     allocation_data[employee].append(lt_info)
         for employee in allocation_data:
             for leave_type_data in allocation_data[employee]:
