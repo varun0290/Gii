@@ -11,6 +11,7 @@
     "data": [
         "views/hr_leave_type_view.xml",
         "views/hr_leave_view.xml",
+        "views/hr_leave_allocation_view.xml",
     ],
     "license": "LGPL-3",
     "installable": True,
