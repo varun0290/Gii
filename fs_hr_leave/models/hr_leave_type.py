@@ -36,8 +36,8 @@ class HolidaysType(models.Model):
 
         for employee in employees:
             for leave_type in leave_type_requires_allocation:
-                # if len(allocations_leaves_consumed[employee][leave_type]) == 0:
-                #     continue
+                if len(allocations_leaves_consumed[employee][leave_type]) == 0:
+                    continue
                 lt_info = (
                     leave_type.name,
                     {
