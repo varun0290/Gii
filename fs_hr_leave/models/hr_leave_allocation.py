@@ -3,4 +3,8 @@ from odoo import models, fields
 class HolidaysAllocation(models.Model):
     _inherit = 'hr.leave.allocation'
 
-    is_carry_forward = fields.Boolean(string="Is Carry Forward")
+    @api.constrains('number_of_days_display')
+    def check_zero_allocation(self):
+        for record in self:
+            if not record.holiday_status_id.allow_zero_allocation and record.number_of_days_display == 0:
+                raise UserError(_("Zero allocation is not allowed"))
