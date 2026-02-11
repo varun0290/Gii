@@ -31,12 +31,8 @@ class Probation(models.Model):
     waiting_for_approval = fields.Boolean()
     is_approve = fields.Boolean()
     state = fields.Selection(
-        selection=[
-            ('draft', 'New'),
+        selection_add=[
             ('probation', 'Probation'),
-            ('open', 'Running'),
-            ('close', 'Expired'),
-            ('cancel', 'Cancelled'),
         ],
     )
     probation_id = fields.Many2one('hr.training')
