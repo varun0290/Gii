@@ -11,10 +11,6 @@ class HolidaysAllocation(models.Model):
             if record.number_of_days_display < 0:
                 raise UserError(_("Negative allocation is not allowed"))
 
-            # Skip validation if zero allocation is allowed
-            if not record.holiday_status_id.allow_zero_allocation:
-                continue
-
             # Check for zero or negative allocation
-            if record.number_of_days_display == 0:
+            if not record.holiday_status_id.allow_zero_allocation and record.number_of_days_display == 0:
                 raise UserError(_("Zero allocation is not allowed"))
