@@ -6,7 +6,7 @@
     </record>
 
     <record id="group_vp_finance" model="res.groups">
-        <field name="name">VP Finance</field>
-        <field name="category_id" ref="base.module_category_accounting_accounting"/>
+        <field name="name">Contract Finance Approver</field>
+        <field name="category_id" ref="base.module_category_human_resources_contracts"/>
     </record>
 </odoo>
