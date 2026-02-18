@@ -13,6 +13,7 @@
                     <button name="action_approve_hr" string="Approve (HR)" type="object" invisible="state != 'wait_hr'" class="oe_highlight" groups="fs_hr_contract.group_head_of_hr"/>
                     <button name="action_approve_finance" string="Approve (Finance)" type="object" invisible="state != 'wait_finance'" class="oe_highlight" groups="fs_hr_contract.group_vp_finance"/>
                     <button name="action_reject" string="Reject" type="object" invisible="state not in ('wait_hr', 'wait_finance')" groups="fs_hr_contract.group_head_of_hr,fs_hr_contract.group_vp_finance"/>
+                    <button name="action_reset_to_draft" string="Reset to Draft" type="object" invisible="state == 'draft'" groups="fs_hr_contract.group_head_of_hr,fs_hr_contract.group_vp_finance"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,wait_hr,wait_finance,open,close,cancel"/>
                 </header>
             </xpath>
@@ -20,7 +21,7 @@
             <!-- Add Employee ID and Probation -->
             <xpath expr="//field[@name='employee_id']" position="after">
                 <field name="employee_id_no"/>
-                <field name="probation_period_months"/>
+                <field name="probation_period_months" readonly="state != 'draft'"/>
             </xpath>
 
             <!-- Add Tabs -->
@@ -28,33 +29,33 @@
                 <page string="Salary Structure" name="salary_structure">
                     <group>
                         <group string="1. Earnings">
-                            <field name="vehicle_allowance"/>
-                            <field name="fixed_telephone_allowance"/>
-                            <field name="fixed_vacation_ticket_allowance"/>
-                            <field name="leave_travel_allowance"/>
-                            <field name="medical_insurance_allowance"/>
-                            <field name="education_other_allowance"/>
+                            <field name="vehicle_allowance" readonly="state != 'draft'"/>
+                            <field name="fixed_telephone_allowance" readonly="state != 'draft'"/>
+                            <field name="fixed_vacation_ticket_allowance" readonly="state != 'draft'"/>
+                            <field name="leave_travel_allowance" readonly="state != 'draft'"/>
+                            <field name="medical_insurance_allowance" readonly="state != 'draft'"/>
+                            <field name="education_other_allowance" readonly="state != 'draft'"/>
                             <field name="total_earnings" decoration-bf="1"/>
                         </group>
                         <group string="2. Additions">
-                            <field name="arrears"/>
-                            <field name="leave_encashment"/>
-                            <field name="reimbursement"/>
-                            <field name="airfare"/>
-                            <field name="other_additions"/>
+                            <field name="arrears" readonly="state != 'draft'"/>
+                            <field name="leave_encashment" readonly="state != 'draft'"/>
+                            <field name="reimbursement" readonly="state != 'draft'"/>
+                            <field name="airfare" readonly="state != 'draft'"/>
+                            <field name="other_additions" readonly="state != 'draft'"/>
                             <field name="total_additions" decoration-bf="1"/>
                         </group>
                     </group>
                     <group>
                         <group string="3. Deductions">
-                            <field name="leave_deduction"/>
-                            <field name="late_coming_deduction"/>
-                            <field name="absent_days_deduction"/>
-                            <field name="loan_repayment"/>
-                            <field name="gosi_deduction"/>
-                            <field name="other_deductions"/>
-                            <field name="vehicle_allowance_deduction"/>
-                            <field name="recurring_deductions"/>
+                            <field name="leave_deduction" readonly="state != 'draft'"/>
+                            <field name="late_coming_deduction" readonly="state != 'draft'"/>
+                            <field name="absent_days_deduction" readonly="state != 'draft'"/>
+                            <field name="loan_repayment" readonly="state != 'draft'"/>
+                            <field name="gosi_deduction" readonly="state != 'draft'"/>
+                            <field name="other_deductions" readonly="state != 'draft'"/>
+                            <field name="vehicle_allowance_deduction" readonly="state != 'draft'"/>
+                            <field name="recurring_deductions" readonly="state != 'draft'"/>
                             <field name="total_deductions" decoration-bf="1"/>
                         </group>
                         <group string="4. Summary">
@@ -62,26 +63,39 @@
                             <field name="net_salary" decoration-bf="1"/>
                             <field name="total_cash_compensation" decoration-bf="1"/>
                             <separator string="5. Pension" colspan="2"/>
-                            <field name="employer_pension_contribution"/>
-                            <field name="employee_pension_contribution"/>
+                            <field name="employer_pension_contribution" readonly="state != 'draft'"/>
+                            <field name="employee_pension_contribution" readonly="state != 'draft'"/>
                         </group>
                     </group>
                 </page>
                 <page string="Increment / Bonus" name="increment_bonus">
                     <group>
                         <group>
-                            <field name="bonus"/>
-                            <field name="special_increment"/>
-                            <field name="promotion_adjustment"/>
+                            <field name="bonus" readonly="state != 'draft'"/>
+                            <field name="special_increment" readonly="state != 'draft'"/>
+                            <field name="promotion_adjustment" readonly="state != 'draft'"/>
                         </group>
                         <group>
-                            <field name="performance_incentives"/>
-                            <field name="one_time_rewards"/>
+                            <field name="performance_incentives" readonly="state != 'draft'"/>
+                            <field name="one_time_rewards" readonly="state != 'draft'"/>
                         </group>
                     </group>
                 </page>
             </xpath>
 
+            <!-- Lock Standard Fields -->
+            <xpath expr="//field[@name='employee_id']" position="attributes">
+                <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='date_start']" position="attributes">
+                <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='date_end']" position="attributes">
+                <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='wage']" position="attributes">
+                <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
         </field>
     </record>
 </odoo>

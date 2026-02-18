@@ -14,35 +14,35 @@ class HrContract(models.Model):
     probation_period_months = fields.Selection([
         ('3', '3 Months'),
         ('6', '6 Months')
-    ], string="Probation Period", default='3')
+    ], string="Probation Period", default='3', tracking=True)
 
     # --- 1. Earnings ---
-    vehicle_allowance = fields.Monetary(string="Vehicle Allowance")
-    fixed_telephone_allowance = fields.Monetary(string="Fixed Telephone Allowance")
-    fixed_vacation_ticket_allowance = fields.Monetary(string="Fixed Vacation Ticket Allowance")
-    leave_travel_allowance = fields.Monetary(string="Leave Travel Allowance")
-    medical_insurance_allowance = fields.Monetary(string="Medical Insurance Allowance")
-    education_other_allowance = fields.Monetary(string="Education & Other Allowance")
-    total_earnings = fields.Monetary(string="Total Earnings", compute='_compute_total_earnings', store=True)
+    vehicle_allowance = fields.Monetary(string="Vehicle Allowance", tracking=True)
+    fixed_telephone_allowance = fields.Monetary(string="Fixed Telephone Allowance", tracking=True)
+    fixed_vacation_ticket_allowance = fields.Monetary(string="Fixed Vacation Ticket Allowance", tracking=True)
+    leave_travel_allowance = fields.Monetary(string="Leave Travel Allowance", tracking=True)
+    medical_insurance_allowance = fields.Monetary(string="Medical Insurance Allowance", tracking=True)
+    education_other_allowance = fields.Monetary(string="Education & Other Allowance", tracking=True)
+    total_earnings = fields.Monetary(string="Total Earnings", compute='_compute_total_earnings', store=True, tracking=True)
 
     # --- 2. Additions ---
-    arrears = fields.Monetary(string="Arrears")
-    leave_encashment = fields.Monetary(string="Leave Encashment")
-    reimbursement = fields.Monetary(string="Reimbursement")
-    airfare = fields.Monetary(string="Airfare")
-    other_additions = fields.Monetary(string="Other Additions")
-    total_additions = fields.Monetary(string="Total Additions", compute='_compute_total_additions', store=True)
+    arrears = fields.Monetary(string="Arrears", tracking=True)
+    leave_encashment = fields.Monetary(string="Leave Encashment", tracking=True)
+    reimbursement = fields.Monetary(string="Reimbursement", tracking=True)
+    airfare = fields.Monetary(string="Airfare", tracking=True)
+    other_additions = fields.Monetary(string="Other Additions", tracking=True)
+    total_additions = fields.Monetary(string="Total Additions", compute='_compute_total_additions', store=True, tracking=True)
 
     # --- 3. Deductions ---
-    leave_deduction = fields.Monetary(string="Leave Deduction")
-    late_coming_deduction = fields.Monetary(string="Late Coming Deduction")
-    absent_days_deduction = fields.Monetary(string="Absent Days Deduction")
-    loan_repayment = fields.Monetary(string="Loan Repayment")
-    gosi_deduction = fields.Monetary(string="GOSI Deduction (Social Security)")
-    other_deductions = fields.Monetary(string="Other Deductions")
-    vehicle_allowance_deduction = fields.Monetary(string="Vehicle Allowance Deduction")
-    recurring_deductions = fields.Monetary(string="Recurring Deductions")
-    total_deductions = fields.Monetary(string="Total Deductions", compute='_compute_total_deductions', store=True)
+    leave_deduction = fields.Monetary(string="Leave Deduction", tracking=True)
+    late_coming_deduction = fields.Monetary(string="Late Coming Deduction", tracking=True)
+    absent_days_deduction = fields.Monetary(string="Absent Days Deduction", tracking=True)
+    loan_repayment = fields.Monetary(string="Loan Repayment", tracking=True)
+    gosi_deduction = fields.Monetary(string="GOSI Deduction (Social Security)", tracking=True)
+    other_deductions = fields.Monetary(string="Other Deductions", tracking=True)
+    vehicle_allowance_deduction = fields.Monetary(string="Vehicle Allowance Deduction", tracking=True)
+    recurring_deductions = fields.Monetary(string="Recurring Deductions", tracking=True)
+    total_deductions = fields.Monetary(string="Total Deductions", compute='_compute_total_deductions', store=True, tracking=True)
 
     # --- 4. Summary ---
     gross_salary = fields.Monetary(string="Gross Salary", compute='_compute_gross_salary', store=True)
@@ -50,15 +50,15 @@ class HrContract(models.Model):
     total_cash_compensation = fields.Monetary(string="Total Cash Compensation", compute='_compute_total_cash_compensation', store=True)
 
     # --- 5. Pension ---
-    employer_pension_contribution = fields.Monetary(string="Employer Pension Contribution")
-    employee_pension_contribution = fields.Monetary(string="Employee Pension Contribution")
+    employer_pension_contribution = fields.Monetary(string="Employer Pension Contribution", tracking=True)
+    employee_pension_contribution = fields.Monetary(string="Employee Pension Contribution", tracking=True)
 
     # --- Increment/Bonus ---
-    bonus = fields.Monetary(string="Bonus")
-    special_increment = fields.Monetary(string="Special Increment")
-    promotion_adjustment = fields.Monetary(string="Promotion Adjustment")
-    performance_incentives = fields.Monetary(string="Performance Incentives")
-    one_time_rewards = fields.Monetary(string="One-Time Rewards")
+    bonus = fields.Monetary(string="Bonus", tracking=True)
+    special_increment = fields.Monetary(string="Special Increment", tracking=True)
+    promotion_adjustment = fields.Monetary(string="Promotion Adjustment", tracking=True)
+    performance_incentives = fields.Monetary(string="Performance Incentives", tracking=True)
+    one_time_rewards = fields.Monetary(string="One-Time Rewards", tracking=True)
 
 
     @api.depends('wage', 'vehicle_allowance', 'fixed_telephone_allowance', 'fixed_vacation_ticket_allowance',
@@ -147,5 +147,14 @@ class HrContract(models.Model):
                 self.env.user.has_group('fs_hr_contract.group_vp_finance') or
                 self.env.user.has_group('base.group_system')):
              raise UserError(_("You are not authorized to reject."))
+        for record in self:
+            record.write({'state': 'draft'})
+
+    def action_reset_to_draft(self):
+        # Allow relevant groups to reset to draft
+        if not (self.env.user.has_group('fs_hr_contract.group_head_of_hr') or 
+                self.env.user.has_group('fs_hr_contract.group_vp_finance') or
+                self.env.user.has_group('base.group_system')):
+             raise UserError(_("You are not authorized to reset to draft."))
         for record in self:
             record.write({'state': 'draft'})
