@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Override the invitation email sent by "Send an Invitation Email" button -->
+        <record id="auth_signup.set_password_email" model="mail.template">
+            <field name="subject">Welcome to {{ object.company_id.name or 'Our System' }} - Your Account Has Been Created</field>
+            <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #FFFFFF; font-family: Verdana, Arial, sans-serif; color: #454748; width: 100%; border-collapse: separate;">
+<tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: #FFFFFF; color: #454748; border-collapse: separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse: separate;">
+                <tr><td valign="middle">
+                    <span style="font-size: 10px;">Welcome to <t t-out="object.company_id.name or 'Odoo'"/> </span><br/>
+                    <span style="font-size: 20px; font-weight: bold;">
+                        <t t-out="object.name or ''">New User</t>
+                    </span>
+                </td><td valign="middle" align="right" t-if="not object.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.company_id.name"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color: rgb(204,204,204); border: medium none; clear: both; display: block; font-size: 0px; min-height: 1px; line-height: 0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT - Welcome & Introduction -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse: separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        <p style="font-size: 15px; font-weight: bold;">Dear <t t-out="object.name or ''"/>,</p>
+                        <p>Welcome to <b><t t-out="object.company_id.name or 'our company'"/></b>! We are delighted to have you on board.</p>
+
+                        <p><b>About <t t-out="object.company_id.name or 'Our System'"/>:</b><br/>
+                        <t t-out="object.company_id.name or 'We'"/> uses Odoo, an integrated business management platform that streamlines our day-to-day operations. You will use this system to collaborate with your team, manage your tasks, and access company information.</p>
+
+                        <hr style="background-color: rgb(240,240,240); border: none; height: 1px; margin: 16px 0;"/>
+
+                        <p><b>Your Login Credentials &amp; Instructions:</b></p>
+                        <ul style="line-height: 1.8;">
+                            <li><b>Username (Login):</b> <t t-out="object.login or object.email or ''"/></li>
+                            <li><b>Email:</b> <t t-out="object.email or ''"/></li>
+                            <li><b>System URL:</b> <t t-set="website_url" t-value="object.get_base_url()"/><a t-att-href="website_url" t-out="website_url or ''">Your Odoo URL</a></li>
+                        </ul>
+
+                        <p><b>Set Your Password (Required):</b><br/>
+                        Please click the button below to set your password and activate your account. This link is secure and will allow you to choose your own password.</p>
+                        <div style="margin: 20px 0px 20px 0px;">
+                            <a t-att-href="object.signup_url"
+                                style="background-color: #875A7B; padding: 12px 24px; text-decoration: none; color: #fff; border-radius: 5px; font-size: 14px; font-weight: bold;">
+                                Set My Password / Activate Account
+                            </a>
+                        </div>
+
+                        <p><b>After Setting Your Password:</b><br/>
+                        <t t-set="login_url" t-value="object.get_base_url() + '/web/login'"/>
+                        Once you have set your password, you can log in at <a t-att-href="login_url" t-out="login_url"/> using your email and the password you chose.</p>
+
+                        <p>If you have any questions or need assistance, please contact your administrator or HR department.</p>
+
+                        <p>Best regards,<br/>
+                        The <t t-out="object.company_id.name or 'Company'"/> Team</p>
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color: rgb(204,204,204); border: medium none; clear: both; display: block; font-size: 0px; min-height: 1px; line-height: 0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- FOOTER -->
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; font-size: 11px; padding: 0px 8px 0px 8px; border-collapse: separate;">
+                <tr><td valign="middle" align="left">
+                    <t t-out="object.company_id.name or ''">YourCompany</t>
+                </td></tr>
+                <tr><td valign="middle" align="left" style="opacity: 0.7;">
+                    <t t-if="object.company_id.phone" t-out="object.company_id.phone"/>
+                    <t t-if="object.company_id.email">
+                        | <a t-att-href="'mailto:%s' % object.company_id.email" style="text-decoration:none; color: #454748;" t-out="object.company_id.email or ''">info@company.com</a>
+                    </t>
+                    <t t-if="object.company_id.website">
+                        | <a t-att-href="'%s' % object.company_id.website" style="text-decoration:none; color: #454748;" t-out="object.company_id.website or ''">http://www.example.com</a>
+                    </t>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+</table>
+            </field>
+        </record>
+    </data>
+</odoo>

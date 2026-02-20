@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hr_document_template_tree" model="ir.ui.view">
+        <field name="name">hr.document.template.tree</field>
+        <field name="model">hr.document.template</field>
+        <field name="arch" type="xml">
+            <list string="Document Templates">
+                <field name="name"/>
+                <field name="document_type"/>
+                <field name="company_id"/>
+                <field name="version"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_hr_document_template_form" model="ir.ui.view">
+        <field name="name">hr.document.template.form</field>
+        <field name="model">hr.document.template</field>
+        <field name="arch" type="xml">
+            <form string="Document Template">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_new_version" type="object" class="oe_stat_button" icon="fa-history" string="New Version"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="document_type"/>
+                            <field name="company_id"/>
+                            <field name="legal_entity_name"/>
+                            <field name="signing_authority_id"/>
+                            <field name="signing_authority_title"/>
+                            <field name="stamp_image" widget="image" options="{'size': [100, 100]}"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="report_id" attrs="{'invisible': [('body_html', '!=', False)]}"/>
+                            <field name="body_html" attrs="{'invisible': [('report_id', '!=', False)]}"/>
+                            <field name="legal_text"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Version History" name="versions">
+                            <field name="template_line_ids" readonly="1">
+                                <list>
+                                    <field name="version"/>
+                                    <field name="body_html"/>
+                                    <field name="legal_text"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hr_document_deployment_tree" model="ir.ui.view">
+        <field name="name">hr.document.deployment.tree</field>
+        <field name="model">hr.document.deployment</field>
+        <field name="arch" type="xml">
+            <list string="Document Deployments">
+                <field name="name"/>
+                <field name="template_id"/>
+                <field name="effective_date"/>
+                <field name="state" widget="badge" decoration-success="state == 'closed'" decoration-info="state == 'sent'" decoration-warning="state == 'draft'"/>
+                <field name="narration"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_hr_document_deployment_form" model="ir.ui.view">
+        <field name="name">hr.document.deployment.form</field>
+        <field name="model">hr.document.deployment</field>
+        <field name="arch" type="xml">
+            <form string="Document Deployment">
+                <header>
+                    <button name="action_prepare_lines" string="Prepare Lines" type="object" class="btn-primary" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                    <button name="action_send" string="Send to Employees" type="object" class="btn-primary" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                    <button name="action_send_reminders" string="Send Reminders" type="object" attrs="{'invisible': [('state', '!=', 'sent')]}"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="template_id"/>
+                            <field name="effective_date"/>
+                            <field name="state"/>
+                            <field name="narration" placeholder="Short narration or message..."/>
+                        </group>
+                        <group string="Employee Selection">
+                            <field name="employee_selection"/>
+                            <field name="department_ids" attrs="{'invisible': [('employee_selection', '!=', 'department')], 'required': [('employee_selection', '=', 'department')]}"/>
+                            <field name="job_ids" attrs="{'invisible': [('employee_selection', '!=', 'job')], 'required': [('employee_selection', '=', 'job')]}"/>
+                            <field name="work_location" attrs="{'invisible': [('employee_selection', '!=', 'location')], 'required': [('employee_selection', '=', 'location')]}"/>
+                            <field name="employee_ids" attrs="{'invisible': [('employee_selection', '!=', 'manual')], 'required': [('employee_selection', '=', 'manual')]}"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Deployment Lines" name="lines">
+                            <field name="line_ids" readonly="1">
+                                <list>
+                                    <field name="employee_id"/>
+                                    <field name="state" widget="badge" decoration-success="state == 'signed'" decoration-info="state == 'viewed'" decoration-warning="state == 'sent'" decoration-muted="state == 'draft'"/>
+                                    <field name="sent_datetime"/>
+                                    <field name="viewed_datetime"/>
+                                    <field name="signed_datetime"/>
+                                    <field name="signed_full_name"/>
+                                    <field name="signed_employee_code"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+</odoo>

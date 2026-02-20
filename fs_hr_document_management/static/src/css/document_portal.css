@@ -1,0 +1,12 @@
+/* HR Document Management - Portal styles */
+.o_portal_my_documents .table td,
+.o_portal_my_documents .table th {
+    vertical-align: middle;
+}
+.o_portal_document_view h3,
+.o_portal_document_acknowledge h3 {
+    margin-bottom: 1rem;
+}
+.o_portal_document_acknowledge .form-control {
+    max-width: 400px;
+}

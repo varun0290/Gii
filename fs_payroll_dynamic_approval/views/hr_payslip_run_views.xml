@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="hr_payslip_run_form_inherit_approval" model="ir.ui.view">
+        <field name="name">hr.payslip.run.form.inherit.approval</field>
+        <field name="model">hr.payslip.run</field>
+        <field name="inherit_id" ref="hr_payroll.hr_payslip_run_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_submit_for_approval" string="Submit for Approval" type="object"
+                    invisible="state != 'verify' or approval_done"
+                    class="oe_highlight"/>
+                <button name="action_approve_hr" string="Approve (HR)" type="object"
+                    invisible="state != 'wait_hr'"
+                    class="oe_highlight" groups="fs_hr_contract.group_head_of_hr"/>
+                <button name="action_approve_finance" string="Approve (Finance)" type="object"
+                    invisible="state != 'wait_finance'"
+                    class="oe_highlight" groups="fs_hr_contract.group_vp_finance"/>
+                <button name="action_reject" string="Reject" type="object"
+                    invisible="state not in ('wait_hr', 'wait_finance')"
+                    groups="fs_hr_contract.group_head_of_hr,fs_hr_contract.group_vp_finance"/>
+            </xpath>
+            <xpath expr="//button[@name='action_validate']" position="attributes">
+                <attribute name="invisible">state != 'verify' or not approval_done</attribute>
+            </xpath>
+            <xpath expr="//field[@name='state']" position="attributes">
+                <attribute name="statusbar_visible">draft,verify,wait_hr,wait_finance,close,paid</attribute>
+            </xpath>
+            <xpath expr="//sheet" position="inside">
+                <field name="approval_done" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

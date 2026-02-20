@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_hr_employee_cost" model="ir.sequence">
+            <field name="name">Employee Cost</field>
+            <field name="code">hr.employee.cost</field>
+            <field name="prefix">EC</field>
+            <field name="padding">5</field>
+        </record>
+    </data>
+</odoo>

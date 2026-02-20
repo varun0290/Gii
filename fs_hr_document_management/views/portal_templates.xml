@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_my_documents" name="My Documents">
+        <t t-call="portal.portal_layout">
+            <t t-set="additional_title">Documents</t>
+            <t t-set="breadcrumbs_searchbar" t-value="False"/>
+            <div class="o_portal_my_documents">
+                <t t-if="lines">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Document</th>
+                                    <th>Deployment</th>
+                                    <th>Effective Date</th>
+                                    <th>Status</th>
+                                    <th>Sent</th>
+                                    <th>Signed</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="lines" t-as="line">
+                                    <tr>
+                                        <td>
+                                            <span t-field="line.deployment_id.template_id.name"/>
+                                        </td>
+                                        <td>
+                                            <span t-field="line.deployment_id.name"/>
+                                        </td>
+                                        <td>
+                                            <span t-field="line.deployment_id.effective_date" t-options="{'widget': 'date'}"/>
+                                        </td>
+                                        <td>
+                                            <span t-attf-class="badge badge-#{ 'success' if line.state == 'signed' else ('info' if line.state == 'viewed' else 'warning') }"
+                                                t-field="line.state"/>
+                                        </td>
+                                        <td>
+                                            <span t-field="line.sent_datetime" t-options="{'widget': 'datetime'}"/>
+                                        </td>
+                                        <td>
+                                            <span t-field="line.signed_datetime" t-options="{'widget': 'datetime'}"/>
+                                        </td>
+                                        <td>
+                                            <a t-att-href="'/my/document/%s?access_token=%s' % (line.id, line.access_token or '')" class="btn btn-primary btn-sm">
+                                                <t t-if="line.state == 'signed'">View</t>
+                                                <t t-else="">View &amp; Sign</t>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+                <t t-else="">
+                    <p>No documents pending.</p>
+                </t>
+            </div>
+        </t>
+    </template>
+    <template id="portal_my_documents_empty" name="My Documents (No Employee)">
+        <t t-call="portal.portal_layout">
+            <t t-set="additional_title">Documents</t>
+            <div class="o_portal_my_documents">
+                <p>Your user is not linked to an employee. Please contact HR.</p>
+            </div>
+        </t>
+    </template>
+    <template id="portal_document_view" name="Document View">
+        <t t-call="portal.portal_layout">
+            <t t-set="additional_title" t-value="line.deployment_id.template_id.name"/>
+            <div class="o_portal_document_view">
+                <h3 t-field="line.deployment_id.template_id.name"/>
+                <p class="text-muted" t-if="line.deployment_id.narration" t-field="line.deployment_id.narration"/>
+                <p>
+                    <a t-att-href="download_url" class="btn btn-secondary">
+                        Download PDF
+                    </a>
+                </p>
+                <t t-if="line.state != 'signed'">
+                    <a t-att-href="ack_url" class="btn btn-primary">
+                        Acknowledge / Sign
+                    </a>
+                </t>
+                <t t-else="">
+                    <p class="text-success">
+                        <strong>Signed on</strong>
+                        <span t-field="line.signed_datetime" t-options="{'widget': 'datetime'}"/>
+                        <t t-if="line.signed_full_name">by <span t-field="line.signed_full_name"/></t>
+                    </p>
+                </t>
+            </div>
+        </t>
+    </template>
+    <template id="portal_document_acknowledge" name="Acknowledge Document">
+        <t t-call="portal.portal_layout">
+            <t t-set="additional_title">Acknowledge Document</t>
+            <div class="o_portal_document_acknowledge">
+                <h3 t-field="line.deployment_id.template_id.name"/>
+                <p>Please confirm your identity and acknowledge this document.</p>
+                <form role="form" method="post" t-att-action="'/my/document/%s/acknowledge?access_token=%s' % (line.id, token)">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <div class="mb-3">
+                        <label for="full_name">Full Name</label>
+                        <input type="text" class="form-control" id="full_name" name="full_name" required="1" placeholder="Your full name"/>
+                    </div>
+                    <div class="mb-3">
+                        <label for="employee_code">Employee Code</label>
+                        <input type="text" class="form-control" id="employee_code" name="employee_code" required="1" placeholder="Your employee code"/>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Confirm &amp; Sign</button>
+                    <a t-att-href="document_url" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </t>
+    </template>
+</odoo>

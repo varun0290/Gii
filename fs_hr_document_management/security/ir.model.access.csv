@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hr_document_template_user,hr.document.template.user,model_hr_document_template,base.group_user,1,0,0,0
+access_hr_document_template_manager,hr.document.template.manager,model_hr_document_template,hr.group_hr_manager,1,1,1,1
+access_hr_document_template_version_user,hr.document.template.version.user,model_hr_document_template_version,base.group_user,1,0,0,0
+access_hr_document_deployment_user,hr.document.deployment.user,model_hr_document_deployment,base.group_user,1,0,0,0
+access_hr_document_deployment_manager,hr.document.deployment.manager,model_hr_document_deployment,hr.group_hr_manager,1,1,1,1
+access_hr_document_deployment_line_user,hr.document.deployment.line.user,model_hr_document_deployment_line,base.group_user,1,0,0,0
+access_hr_document_deployment_line_manager,hr.document.deployment.line.manager,model_hr_document_deployment_line,hr.group_hr_manager,1,1,1,1
+access_hr_employee_document_user,hr.employee.document.user,model_hr_employee_document,base.group_user,1,0,0,0
+access_hr_employee_document_manager,hr.employee.document.manager,model_hr_employee_document,hr.group_hr_manager,1,1,1,1

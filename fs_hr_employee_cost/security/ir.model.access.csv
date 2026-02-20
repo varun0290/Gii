@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hr_cost_centre_user,hr.cost.centre.user,model_hr_cost_centre,base.group_user,1,0,0,0
+access_hr_cost_centre_manager,hr.cost.centre.manager,model_hr_cost_centre,hr.group_hr_manager,1,1,1,1
+access_hr_employee_cost_user,hr.employee.cost.user,model_hr_employee_cost,hr.group_hr_user,1,0,0,0
+access_hr_employee_cost_manager,hr.employee.cost.manager,model_hr_employee_cost,hr.group_hr_manager,1,1,1,1

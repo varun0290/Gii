@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hr_cost_centre_tree" model="ir.ui.view">
+        <field name="name">hr.cost.centre.tree</field>
+        <field name="model">hr.cost.centre</field>
+        <field name="arch" type="xml">
+            <list string="Cost Centres">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_hr_cost_centre_form" model="ir.ui.view">
+        <field name="name">hr.cost.centre.form</field>
+        <field name="model">hr.cost.centre</field>
+        <field name="arch" type="xml">
+            <form string="Cost Centre">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="code"/>
+                        <field name="active"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>
