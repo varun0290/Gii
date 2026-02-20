@@ -83,8 +83,11 @@
                 </page>
             </xpath>
 
-            <!-- Lock Standard Fields -->
+            <!-- Lock Standard Fields (non-editable after submit for approval) -->
             <xpath expr="//field[@name='employee_id']" position="attributes">
+                <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='name']" position="attributes">
                 <attribute name="readonly">state != 'draft'</attribute>
             </xpath>
             <xpath expr="//field[@name='date_start']" position="attributes">
@@ -94,6 +97,30 @@
                 <attribute name="readonly">state != 'draft'</attribute>
             </xpath>
             <xpath expr="//field[@name='wage']" position="attributes">
+                <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='structure_type_id']" position="attributes">
+                <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='resource_calendar_id']" position="attributes">
+                <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='department_id']" position="attributes">
+                <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='job_id']" position="attributes">
+                <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='contract_type_id']" position="attributes">
+                <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='notes']" position="attributes">
+                <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='kanban_state']" position="attributes">
+                <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='hr_responsible_id']" position="attributes">
                 <attribute name="readonly">state != 'draft'</attribute>
             </xpath>
         </field>

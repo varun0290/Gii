@@ -1,8 +1,40 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
+
+# Fields that may not be edited after the contract is submitted for approval
+# (state in wait_hr, wait_finance, open, close, cancel)
+PROTECTED_CONTRACT_FIELDS = frozenset({
+    # Standard hr.contract
+    'name', 'active', 'employee_id', 'date_start', 'date_end', 'trial_date_end',
+    'wage', 'structure_type_id', 'resource_calendar_id', 'department_id', 'job_id',
+    'contract_type_id', 'notes', 'kanban_state', 'hr_responsible_id',
+    'permit_no', 'visa_no', 'company_id',
+    # ent_hr_gratuity_settlement (wage_type, hourly_wage)
+    'wage_type', 'hourly_wage', 'training_amount', 'training_info',
+    'waiting_for_approval', 'is_approve', 'probation_id', 'company_country_id',
+    # ent_ohrms_overtime
+    'over_day', 'over_hour',
+    # l10n_ae UAE localization (if installed)
+    'l10n_ae_housing_allowance', 'l10n_ae_transportation_allowance', 'l10n_ae_other_allowances',
+    # fs_hr_contract custom fields
+    'probation_period_months',
+    'vehicle_allowance', 'fixed_telephone_allowance', 'fixed_vacation_ticket_allowance',
+    'leave_travel_allowance', 'medical_insurance_allowance', 'education_other_allowance',
+    'arrears', 'leave_encashment', 'reimbursement', 'airfare', 'other_additions',
+    'leave_deduction', 'late_coming_deduction', 'absent_days_deduction', 'loan_repayment',
+    'gosi_deduction', 'other_deductions', 'vehicle_allowance_deduction', 'recurring_deductions',
+    'employer_pension_contribution', 'employee_pension_contribution',
+    'bonus', 'special_increment', 'promotion_adjustment', 'performance_incentives',
+    'one_time_rewards',
+})
+
+
 class HrContract(models.Model):
     _inherit = 'hr.contract'
+
+    # Ensure notes has tracking for field change history
+    notes = fields.Html(tracking=True)
 
     state = fields.Selection(selection_add=[
         ('wait_hr', 'Waiting HR Approval'),
@@ -122,6 +154,20 @@ class HrContract(models.Model):
             # Actually, "Total Cash Compensation" often strictly means base + variable cash.
             # I will assume it = Net Salary for now.
             record.total_cash_compensation = record.net_salary
+
+    def write(self, vals):
+        """Block editing of contract fields after submission for approval."""
+        if vals:
+            locked = self.filtered(lambda c: c.state != 'draft')
+            if locked:
+                protected_in_vals = (set(vals.keys()) & PROTECTED_CONTRACT_FIELDS) & set(self._fields.keys())
+                other_than_state = protected_in_vals - {'state'}
+                if other_than_state:
+                    raise UserError(_(
+                        "Contract fields cannot be modified after submission for approval. "
+                        "Use 'Reset to Draft' to make changes."
+                    ))
+        return super().write(vals)
 
     def action_submit_for_approval(self):
         for record in self:
