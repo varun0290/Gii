@@ -4,13 +4,13 @@
         <field name="name">hr.document.deployment.tree</field>
         <field name="model">hr.document.deployment</field>
         <field name="arch" type="xml">
-            <list string="Document Deployments">
+            <tree string="Document Deployments">
                 <field name="name"/>
                 <field name="template_id"/>
                 <field name="effective_date"/>
                 <field name="state" widget="badge" decoration-success="state == 'closed'" decoration-info="state == 'sent'" decoration-warning="state == 'draft'"/>
                 <field name="narration"/>
-            </list>
+            </tree>
         </field>
     </record>
     <record id="view_hr_document_deployment_form" model="ir.ui.view">
@@ -43,7 +43,7 @@
                     <notebook>
                         <page string="Deployment Lines" name="lines">
                             <field name="line_ids" readonly="1">
-                                <list>
+                                <tree>
                                     <field name="employee_id"/>
                                     <field name="state" widget="badge" decoration-success="state == 'signed'" decoration-info="state == 'viewed'" decoration-warning="state == 'sent'" decoration-muted="state == 'draft'"/>
                                     <field name="sent_datetime"/>
@@ -51,7 +51,7 @@
                                     <field name="signed_datetime"/>
                                     <field name="signed_full_name"/>
                                     <field name="signed_employee_code"/>
-                                </list>
+                                </tree>
                             </field>
                         </page>
                     </notebook>

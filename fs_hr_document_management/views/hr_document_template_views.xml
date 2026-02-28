@@ -4,13 +4,13 @@
         <field name="name">hr.document.template.tree</field>
         <field name="model">hr.document.template</field>
         <field name="arch" type="xml">
-            <list string="Document Templates">
+            <tree string="Document Templates">
                 <field name="name"/>
                 <field name="document_type"/>
                 <field name="company_id"/>
                 <field name="version"/>
                 <field name="active"/>
-            </list>
+            </tree>
         </field>
     </record>
     <record id="view_hr_document_template_form" model="ir.ui.view">
@@ -42,11 +42,11 @@
                     <notebook>
                         <page string="Version History" name="versions">
                             <field name="template_line_ids" readonly="1">
-                                <list>
+                                <tree>
                                     <field name="version"/>
                                     <field name="body_html"/>
                                     <field name="legal_text"/>
-                                </list>
+                                </tree>
                             </field>
                         </page>
                     </notebook>
