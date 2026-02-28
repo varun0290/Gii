@@ -35,7 +35,7 @@
         <field name="name">hr.employee.cost.tree</field>
         <field name="model">hr.employee.cost</field>
         <field name="arch" type="xml">
-            <list string="Employee Costs">
+            <tree string="Employee Costs">
                 <field name="name"/>
                 <field name="employee_id"/>
                 <field name="cost_type"/>
@@ -45,7 +45,7 @@
                 <field name="cost_centre_id"/>
                 <field name="effective_date"/>
                 <field name="state" widget="badge" decoration-success="state == 'approved'" decoration-warning="state == 'wait_hr'" decoration-danger="state == 'rejected'" decoration-muted="state == 'draft'"/>
-            </list>
+            </tree>
         </field>
     </record>
     <record id="view_hr_employee_cost_form" model="ir.ui.view">

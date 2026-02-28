@@ -14,7 +14,7 @@
                     <button name="action_approve_finance" string="Approve (Finance)" type="object" invisible="state != 'wait_finance'" class="oe_highlight" groups="fs_hr_contract.group_vp_finance"/>
                     <button name="action_reject" string="Reject" type="object" invisible="state not in ('wait_hr', 'wait_finance')" groups="fs_hr_contract.group_head_of_hr,fs_hr_contract.group_vp_finance"/>
                     <button name="action_reset_to_draft" string="Reset to Draft" type="object" invisible="state == 'draft'" groups="fs_hr_contract.group_head_of_hr,fs_hr_contract.group_vp_finance"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,wait_hr,wait_finance,open,close,cancel"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,open,close,cancel"/>
                 </header>
             </xpath>
 
