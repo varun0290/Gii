@@ -10,9 +10,6 @@ PROTECTED_CONTRACT_FIELDS = frozenset({
     'wage', 'structure_type_id', 'resource_calendar_id', 'department_id', 'job_id',
     'contract_type_id', 'notes', 'hr_responsible_id',
     'permit_no', 'visa_no', 'company_id',
-    # ent_hr_gratuity_settlement (wage_type, hourly_wage)
-    'wage_type', 'hourly_wage', 'training_amount', 'training_info',
-    'waiting_for_approval', 'is_approve', 'probation_id', 'company_country_id',
     # ent_ohrms_overtime
     'over_day', 'over_hour',
     # l10n_ae UAE localization (if installed)
@@ -30,16 +27,20 @@ PROTECTED_CONTRACT_FIELDS = frozenset({
 })
 
 
+
 class HrContract(models.Model):
     _inherit = 'hr.contract'
 
     # Ensure notes has tracking for field change history
     notes = fields.Html(tracking=True)
 
-    state = fields.Selection(selection_add=[
-        ('wait_hr', 'Waiting HR Approval'),
-        ('wait_finance', 'Waiting Finance Approval')
-    ], ondelete={'wait_hr': 'set default', 'wait_finance': 'set default'})
+    state = fields.Selection(
+        selection_add=[
+            ('wait_hr', 'Waiting HR Approval'),
+            ('wait_finance', 'Waiting Finance Approval'),
+        ],
+        ondelete={'wait_hr': 'set default', 'wait_finance': 'set default'},
+    )
 
     # --- Employee Info ---
     employee_id_no = fields.Char(string="Employee ID No", related='employee_id.barcode', readonly=True)
@@ -157,11 +158,15 @@ class HrContract(models.Model):
 
     def write(self, vals):
         """Block editing of contract fields after submission for approval."""
-        if vals:
-            locked = self.filtered(lambda c: c.state != 'draft')
-            if locked:
+        if not self._context.get('skip_hr_contract_lock') and vals:
+            # We lock the contract if it is in any stage other than Draft or Probation
+            locked_states = ('wait_hr', 'wait_finance', 'open', 'close', 'cancel')
+            locked_records = self.filtered(lambda c: c.state in locked_states)
+            
+            if locked_records:
                 protected_in_vals = (set(vals.keys()) & PROTECTED_CONTRACT_FIELDS) & set(self._fields.keys())
                 other_than_state = protected_in_vals - {'state'}
+                
                 if other_than_state:
                     raise UserError(_(
                         "Contract fields (%s) cannot be modified after submission for approval. "
@@ -171,21 +176,21 @@ class HrContract(models.Model):
 
     def action_submit_for_approval(self):
         for record in self:
-            record.write({'state': 'wait_hr'})
+            record.with_context(skip_hr_contract_lock=True).write({'state': 'wait_hr'})
 
     def action_approve_hr(self):
         # Check permissions for Head of HR group
         if not self.env.user.has_group('fs_hr_contract.group_head_of_hr') and not self.env.user.has_group('base.group_system'):
              raise UserError(_("You are not authorized to perform this action. Only Head of HR can approve."))
         for record in self:
-            record.write({'state': 'wait_finance'})
+            record.with_context(skip_hr_contract_lock=True).write({'state': 'wait_finance'})
 
     def action_approve_finance(self):
         # Check permissions for VP Finance group
         if not self.env.user.has_group('fs_hr_contract.group_vp_finance') and not self.env.user.has_group('base.group_system'):
              raise UserError(_("You are not authorized to perform this action. Only VP Finance can approve."))
         for record in self:
-            record.write({'state': 'open'})
+            record.with_context(skip_hr_contract_lock=True).write({'state': 'open'})
 
     def action_reject(self):
         # Rejection moves back to draft
@@ -194,7 +199,7 @@ class HrContract(models.Model):
                 self.env.user.has_group('base.group_system')):
              raise UserError(_("You are not authorized to reject."))
         for record in self:
-            record.write({'state': 'draft'})
+            record.with_context(skip_hr_contract_lock=True).write({'state': 'draft'})
 
     def action_reset_to_draft(self):
         # Allow relevant groups to reset to draft
@@ -203,4 +208,4 @@ class HrContract(models.Model):
                 self.env.user.has_group('base.group_system')):
              raise UserError(_("You are not authorized to reset to draft."))
         for record in self:
-            record.write({'state': 'draft'})
+            record.with_context(skip_hr_contract_lock=True).write({'state': 'draft'})

@@ -34,6 +34,7 @@ class Probation(models.Model):
         selection_add=[
             ('probation', 'Probation'),
         ],
+        ondelete={'probation': 'cascade'},
     )
     probation_id = fields.Many2one('hr.training')
     half_leave_ids = fields.Many2many('hr.leave', string="Half Leave")
