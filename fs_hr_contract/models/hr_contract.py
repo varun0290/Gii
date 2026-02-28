@@ -209,3 +209,23 @@ class HrContract(models.Model):
              raise UserError(_("You are not authorized to reset to draft."))
         for record in self:
             record.with_context(skip_hr_contract_lock=True).write({'state': 'draft'})
+
+    def sorted(self, key=None, reverse=False):
+        """
+        Targeted fix for Odoo Enterprise KeyError on custom states ('wait_hr', 'wait_finance').
+        The hr_work_entry_holidays module hardcodes contract states in its write() sorting logic
+        using a literal dictionary: {'open': 1, 'close': 2, 'draft': 3, 'cancel': 4}.
+        We intercept the KeyError and provide a safe fallback priority (3, matching 'draft').
+        """
+        if key and callable(key):
+            orig_key = key
+            def wrapped_key(rec):
+                try:
+                    return orig_key(rec)
+                except KeyError as e:
+                    field_val = str(e).strip("'\"")
+                    if field_val in ('wait_hr', 'wait_finance'):
+                        return 3 # 'draft' priority
+                    raise e
+            return super().sorted(key=wrapped_key, reverse=reverse)
+        return super().sorted(key=key, reverse=reverse)
