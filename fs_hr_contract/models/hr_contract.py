@@ -164,9 +164,9 @@ class HrContract(models.Model):
                 other_than_state = protected_in_vals - {'state'}
                 if other_than_state:
                     raise UserError(_(
-                        "Contract fields cannot be modified after submission for approval. "
+                        "Contract fields (%s) cannot be modified after submission for approval. "
                         "Use 'Reset to Draft' to make changes."
-                    ))
+                    ) % ", ".join(other_than_state))
         return super().write(vals)
 
     def action_submit_for_approval(self):
