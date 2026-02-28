@@ -8,7 +8,7 @@ PROTECTED_CONTRACT_FIELDS = frozenset({
     # Standard hr.contract
     'name', 'active', 'employee_id', 'date_start', 'date_end', 'trial_date_end',
     'wage', 'structure_type_id', 'resource_calendar_id', 'department_id', 'job_id',
-    'contract_type_id', 'notes', 'kanban_state', 'hr_responsible_id',
+    'contract_type_id', 'notes', 'hr_responsible_id',
     'permit_no', 'visa_no', 'company_id',
     # ent_hr_gratuity_settlement (wage_type, hourly_wage)
     'wage_type', 'hourly_wage', 'training_amount', 'training_info',
