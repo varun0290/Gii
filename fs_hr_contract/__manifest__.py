@@ -8,7 +8,7 @@
     'category': 'Human Resources/Contracts',
     'author': 'Fidobe Solutions LLC',
     'website': 'https://www.fidobe.com/',
-    'depends': ['hr_contract'],
+    'depends': ['hr_contract','l10n_ae_hr_payroll'],
     'data': [
         'security/security.xml',
         'views/hr_contract_view.xml',
