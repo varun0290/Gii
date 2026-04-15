@@ -8,11 +8,7 @@
     'category': 'Human Resources/Contracts',
     'author': 'Fidobe Solutions LLC',
     'website': 'https://www.fidobe.com/',
-<<<<<<< Updated upstream
-    'depends': ['hr_contract','l10n_ae_hr_payroll'],
-=======
-    'depends': ['hr_contract', 'hr_payroll'],
->>>>>>> Stashed changes
+    'depends': ['hr_contract', 'hr_payroll', 'l10n_ae_hr_payroll'],
     'data': [
         'security/security.xml',
         'views/hr_contract_view.xml',

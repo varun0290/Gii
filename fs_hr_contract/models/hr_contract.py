@@ -105,18 +105,17 @@ class HrContract(models.Model):
                  'l10n_ae_housing_allowance', 'l10n_ae_transportation_allowance', 'l10n_ae_other_allowances')
     def _compute_total_earnings(self):
         for record in self:
-            housing = getattr(record, 'l10n_ae_housing_allowance', 0.0) or 0.0
-            transportation = getattr(record, 'l10n_ae_transportation_allowance', 0.0) or 0.0
-            other = getattr(record, 'l10n_ae_other_allowances', 0.0) or 0.0
             record.total_earnings = (
-                record.wage +
-                record.vehicle_allowance +
-                record.fixed_telephone_allowance +
-                record.fixed_vacation_ticket_allowance +
-                record.leave_travel_allowance +
-                record.medical_insurance_allowance +
-                record.education_other_allowance +
-                housing + transportation + other
+                (record.wage or 0.0) +
+                (record.l10n_ae_housing_allowance or 0.0) +
+                (record.l10n_ae_transportation_allowance or 0.0) +
+                (record.l10n_ae_other_allowances or 0.0) +
+                (record.vehicle_allowance or 0.0) +
+                (record.fixed_telephone_allowance or 0.0) +
+                (record.fixed_vacation_ticket_allowance or 0.0) +
+                (record.leave_travel_allowance or 0.0) +
+                (record.medical_insurance_allowance or 0.0) +
+                (record.education_other_allowance or 0.0)
             )
 
     @api.depends('arrears', 'leave_encashment', 'reimbursement', 'airfare', 'other_additions')
