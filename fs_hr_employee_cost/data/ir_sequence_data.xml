@@ -4,8 +4,9 @@
         <record id="seq_hr_employee_cost" model="ir.sequence">
             <field name="name">Employee Cost</field>
             <field name="code">hr.employee.cost</field>
-            <field name="prefix">EC</field>
+            <field name="prefix">COST/%(range_year)s/</field>
             <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
         </record>
     </data>
 </odoo>

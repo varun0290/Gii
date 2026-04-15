@@ -58,29 +58,35 @@
                     <button name="action_approve" string="Approve" type="object" invisible="state != 'wait_hr'" class="oe_highlight" groups="fs_hr_contract.group_head_of_hr"/>
                     <button name="action_reject" string="Reject" type="object" invisible="state != 'wait_hr'" groups="fs_hr_contract.group_head_of_hr"/>
                     <button name="action_reset_to_draft" string="Reset to Draft" type="object" invisible="state == 'draft'" groups="fs_hr_contract.group_head_of_hr"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,wait_hr,approved,rejected"/>
                 </header>
                 <sheet>
-                    <div class="oe_button_box" name="button_box">
-                        <field name="state" widget="statusbar" statusbar_visible="draft,wait_hr,approved,rejected"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
                     </div>
                     <group>
                         <group>
-                            <field name="name"/>
                             <field name="employee_id" readonly="state not in ('draft', 'rejected')"/>
                             <field name="cost_type" readonly="state not in ('draft', 'rejected')"/>
                             <field name="amount" readonly="state not in ('draft', 'rejected')"/>
                             <field name="currency_id" invisible="1"/>
-                            <field name="effective_date" readonly="state not in ('draft', 'rejected')"/>
                         </group>
                         <group>
                             <field name="department_id" readonly="state not in ('draft', 'rejected')"/>
                             <field name="cost_centre_id" readonly="state not in ('draft', 'rejected')"/>
-                            <field name="state" invisible="1"/>
+                            <field name="effective_date" readonly="state not in ('draft', 'rejected')"/>
                         </group>
                     </group>
-                    <group>
-                        <field name="notes" colspan="2"/>
-                    </group>
+                    <notebook>
+                        <page string="Notes" name="notes">
+                            <field name="notes" placeholder="Add any specific notes here..."/>
+                        </page>
+                        <page string="Attachments" name="attachments">
+                            <field name="attachment_ids" widget="many2many_binary" string="Attachments"/>
+                        </page>
+                    </notebook>
                 </sheet>
                 <chatter/>
             </form>

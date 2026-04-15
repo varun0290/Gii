@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="hr_contract_probation_review_wizard_view_form" model="ir.ui.view">
+        <field name="name">hr.contract.probation.review.wizard.view.form</field>
+        <field name="model">hr.contract.probation.review.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Probation Review">
+                <sheet>
+                    <group>
+                        <field name="contract_id" readonly="1"/>
+                        <field name="review_phase" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="feedback" placeholder="Enter review feedback here..."/>
+                        <field name="decision" invisible="review_phase != '5'" required="review_phase == '5'"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_submit_review" string="Submit Review" type="object" class="oe_highlight"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

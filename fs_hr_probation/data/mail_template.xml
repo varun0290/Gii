@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Notification to Line Manager -->
+        <record id="mail_template_probation_review_notice" model="mail.template">
+            <field name="name">Probation Review: Notice to Line Manager</field>
+            <field name="model_id" ref="hr_contract.model_hr_contract"/>
+            <field name="subject">Probation Review Due: {{ object.employee_id.name }} (Month {{ ctx.get('review_month') }})</field>
+            <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
+            <field name="email_to">{{ object.employee_id.parent_id.work_email }}</field>
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px;">
+                    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                        Dear <t t-out="object.employee_id.parent_id.name or 'Line Manager'"/>,
+                        <br/><br/>
+                        The probation review for <strong><t t-out="object.employee_id.name"/></strong> is now due for the <strong>Month <t t-out="ctx.get('review_month') or '3'"/></strong> phase.
+                        <br/><br/>
+                        Please log in to Odoo, navigate to the employee's contract, and click the <strong>'Probation Review'</strong> button to enter your feedback.
+                        <br/><br/>
+                        Thank you.
+                    </p>
+                </div>
+            </field>
+        </record>
+
+        <!-- Full Time Confirmation to Employee -->
+        <record id="mail_template_full_time_confirmation" model="mail.template">
+            <field name="name">Probation Confirmed: Full-Time Confirmation</field>
+            <field name="model_id" ref="hr_contract.model_hr_contract"/>
+            <field name="subject">Congratulations! Your Probation has been Confirmed</field>
+            <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
+            <field name="email_to">{{ object.employee_id.work_email }}</field>
+            <field name="report_template" ref="fs_giluat_reports.action_probation_period_review_confirmed_no_changes"/>
+            <field name="report_name">Confirmation_Letter_{{ (object.employee_id.name or '').replace('/','_') }}</field>
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px;">
+                    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                        Dear <t t-out="object.employee_id.name"/>,
+                        <br/><br/>
+                        Congratulations! We are pleased to inform you that you have successfully completed your probation period.
+                        <br/><br/>
+                        Your status has been updated to full-time regular employee effective immediately. Please find your official confirmation letter attached to this email.
+                        <br/><br/>
+                        We wish you continued success with us.
+                        <br/><br/>
+                        Best regards,
+                        <br/>
+                        Human Resources Department
+                    </p>
+                </div>
+            </field>
+        </record>
+    </data>
+</odoo>

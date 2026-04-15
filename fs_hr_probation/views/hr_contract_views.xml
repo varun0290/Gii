@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="hr_contract_view_form_inherit_probation" model="ir.ui.view">
+        <field name="name">hr.contract.view.form.inherit.probation</field>
+        <field name="model">hr.contract</field>
+        <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Add Review button to header -->
+            <xpath expr="//header" position="inside">
+                <button name="action_probation_review" string="Probation Review" type="object" invisible="state != 'probation'" class="oe_highlight"/>
+            </xpath>
+            
+            <!-- Modify statusbar to include Probation -->
+            <xpath expr="//field[@name='state']" position="attributes">
+                <attribute name="statusbar_visible">draft,wait_hr,wait_finance,probation,open,close,cancel</attribute>
+            </xpath>
+
+            <!-- Probation Reviews Tab -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Probation Reviews" name="probation_reviews">
+                    <group>
+                        <group string="3rd Month Review">
+                            <field name="probation_review_3_done" readonly="1"/>
+                            <field name="probation_review_3_feedback" readonly="1"/>
+                        </group>
+                        <group string="5th Month Review">
+                            <field name="probation_review_5_done" readonly="1"/>
+                            <field name="probation_review_5_feedback" readonly="1"/>
+                            <field name="probation_final_decision" readonly="1"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

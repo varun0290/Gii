@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Earnings / Allowances -->
+        <record id="hr_salary_rule_vehicle_allowance" model="hr.salary.rule">
+            <field name="name">Vehicle Allowance</field>
+            <field name="code">VEHICLE_ALW</field>
+            <field name="category_id" ref="hr_payroll.ALW"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.vehicle_allowance > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = contract.vehicle_allowance</field>
+            <field name="sequence" eval="20"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <record id="hr_salary_rule_fixed_telephone_allowance" model="hr.salary.rule">
+            <field name="name">Fixed Telephone Allowance</field>
+            <field name="code">TELEPHONE_ALW</field>
+            <field name="category_id" ref="hr_payroll.ALW"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.fixed_telephone_allowance > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = contract.fixed_telephone_allowance</field>
+            <field name="sequence" eval="21"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <record id="hr_salary_rule_fixed_vacation_ticket_allowance" model="hr.salary.rule">
+            <field name="name">Fixed Vacation Ticket Allowance</field>
+            <field name="code">VACATION_TICKET_ALW</field>
+            <field name="category_id" ref="hr_payroll.ALW"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.fixed_vacation_ticket_allowance > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = contract.fixed_vacation_ticket_allowance</field>
+            <field name="sequence" eval="22"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <record id="hr_salary_rule_leave_travel_allowance" model="hr.salary.rule">
+            <field name="name">Leave Travel Allowance</field>
+            <field name="code">LEAVE_TRAVEL_ALW</field>
+            <field name="category_id" ref="hr_payroll.ALW"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.leave_travel_allowance > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = contract.leave_travel_allowance</field>
+            <field name="sequence" eval="23"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <record id="hr_salary_rule_medical_insurance_allowance" model="hr.salary.rule">
+            <field name="name">Medical Insurance Allowance</field>
+            <field name="code">MEDICAL_ALW</field>
+            <field name="category_id" ref="hr_payroll.ALW"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.medical_insurance_allowance > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = contract.medical_insurance_allowance</field>
+            <field name="sequence" eval="24"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <record id="hr_salary_rule_education_other_allowance" model="hr.salary.rule">
+            <field name="name">Education &amp; Other Allowance</field>
+            <field name="code">EDUCATION_ALW</field>
+            <field name="category_id" ref="hr_payroll.ALW"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.education_other_allowance > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = contract.education_other_allowance</field>
+            <field name="sequence" eval="25"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <!-- Additions -->
+        <record id="hr_salary_rule_arrears" model="hr.salary.rule">
+            <field name="name">Arrears</field>
+            <field name="code">ARREARS</field>
+            <field name="category_id" ref="hr_payroll.ALW"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.arrears > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = contract.arrears</field>
+            <field name="sequence" eval="30"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <record id="hr_salary_rule_leave_encashment" model="hr.salary.rule">
+            <field name="name">Leave Encashment</field>
+            <field name="code">LEAVE_ENCASHMENT</field>
+            <field name="category_id" ref="hr_payroll.ALW"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.leave_encashment > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = contract.leave_encashment</field>
+            <field name="sequence" eval="31"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <record id="hr_salary_rule_reimbursement" model="hr.salary.rule">
+            <field name="name">Reimbursement</field>
+            <field name="code">REIMBURSEMENT</field>
+            <field name="category_id" ref="hr_payroll.ALW"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.reimbursement > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = contract.reimbursement</field>
+            <field name="sequence" eval="32"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <record id="hr_salary_rule_airfare" model="hr.salary.rule">
+            <field name="name">Airfare</field>
+            <field name="code">AIRFARE</field>
+            <field name="category_id" ref="hr_payroll.ALW"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.airfare > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = contract.airfare</field>
+            <field name="sequence" eval="33"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <record id="hr_salary_rule_other_additions" model="hr.salary.rule">
+            <field name="name">Other Additions</field>
+            <field name="code">OTHER_ADD</field>
+            <field name="category_id" ref="hr_payroll.ALW"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.other_additions > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = contract.other_additions</field>
+            <field name="sequence" eval="34"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <!-- Bonus / Rewards -->
+        <record id="hr_salary_rule_bonus" model="hr.salary.rule">
+            <field name="name">Bonus</field>
+            <field name="code">BONUS</field>
+            <field name="category_id" ref="hr_payroll.ALW"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.bonus > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = contract.bonus</field>
+            <field name="sequence" eval="40"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <record id="hr_salary_rule_special_increment" model="hr.salary.rule">
+            <field name="name">Special Increment</field>
+            <field name="code">SPECIAL_INC</field>
+            <field name="category_id" ref="hr_payroll.ALW"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.special_increment > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = contract.special_increment</field>
+            <field name="sequence" eval="41"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <record id="hr_salary_rule_promotion_adjustment" model="hr.salary.rule">
+            <field name="name">Promotion Adjustment</field>
+            <field name="code">PROMOTION_ADJ</field>
+            <field name="category_id" ref="hr_payroll.ALW"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.promotion_adjustment > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = contract.promotion_adjustment</field>
+            <field name="sequence" eval="42"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <record id="hr_salary_rule_performance_incentives" model="hr.salary.rule">
+            <field name="name">Performance Incentives</field>
+            <field name="code">PERF_INCENTIVE</field>
+            <field name="category_id" ref="hr_payroll.ALW"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.performance_incentives > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = contract.performance_incentives</field>
+            <field name="sequence" eval="43"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <record id="hr_salary_rule_one_time_rewards" model="hr.salary.rule">
+            <field name="name">One-Time Rewards</field>
+            <field name="code">REWARD</field>
+            <field name="category_id" ref="hr_payroll.ALW"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.one_time_rewards > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = contract.one_time_rewards</field>
+            <field name="sequence" eval="44"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <!-- Deductions -->
+        <record id="hr_salary_rule_leave_deduction" model="hr.salary.rule">
+            <field name="name">Leave Deduction</field>
+            <field name="code">LEAVE_DED</field>
+            <field name="category_id" ref="hr_payroll.DED"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.leave_deduction > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = -contract.leave_deduction</field>
+            <field name="sequence" eval="100"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <record id="hr_salary_rule_late_coming_deduction" model="hr.salary.rule">
+            <field name="name">Late Coming Deduction</field>
+            <field name="code">LATE_COMING_DED</field>
+            <field name="category_id" ref="hr_payroll.DED"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.late_coming_deduction > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = -contract.late_coming_deduction</field>
+            <field name="sequence" eval="101"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <record id="hr_salary_rule_absent_days_deduction" model="hr.salary.rule">
+            <field name="name">Absent Days Deduction</field>
+            <field name="code">ABSENT_DED</field>
+            <field name="category_id" ref="hr_payroll.DED"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.absent_days_deduction > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = -contract.absent_days_deduction</field>
+            <field name="sequence" eval="102"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <record id="hr_salary_rule_loan_repayment" model="hr.salary.rule">
+            <field name="name">Loan Repayment</field>
+            <field name="code">LOAN_REPAY</field>
+            <field name="category_id" ref="hr_payroll.DED"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.loan_repayment > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = -contract.loan_repayment</field>
+            <field name="sequence" eval="103"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <record id="hr_salary_rule_gosi_deduction" model="hr.salary.rule">
+            <field name="name">GOSI Deduction (Social Security)</field>
+            <field name="code">GOSI_DED</field>
+            <field name="category_id" ref="hr_payroll.DED"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.gosi_deduction > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = -contract.gosi_deduction</field>
+            <field name="sequence" eval="104"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <record id="hr_salary_rule_other_deductions" model="hr.salary.rule">
+            <field name="name">Other Deductions</field>
+            <field name="code">OTHER_DED</field>
+            <field name="category_id" ref="hr_payroll.DED"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.other_deductions > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = -contract.other_deductions</field>
+            <field name="sequence" eval="105"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <record id="hr_salary_rule_vehicle_allowance_deduction" model="hr.salary.rule">
+            <field name="name">Vehicle Allowance Deduction</field>
+            <field name="code">VEHICLE_ALW_DED</field>
+            <field name="category_id" ref="hr_payroll.DED"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.vehicle_allowance_deduction > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = -contract.vehicle_allowance_deduction</field>
+            <field name="sequence" eval="106"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <record id="hr_salary_rule_recurring_deductions" model="hr.salary.rule">
+            <field name="name">Recurring Deductions</field>
+            <field name="code">RECURRING_DED</field>
+            <field name="category_id" ref="hr_payroll.DED"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.recurring_deductions > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = -contract.recurring_deductions</field>
+            <field name="sequence" eval="107"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <!-- Pension -->
+        <record id="hr_salary_rule_employer_pension_contribution" model="hr.salary.rule">
+            <field name="name">Employer Pension Contribution</field>
+            <field name="code">EX_PENSION</field>
+            <field name="category_id" ref="hr_payroll.COMP"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.employer_pension_contribution > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = contract.employer_pension_contribution</field>
+            <field name="sequence" eval="150"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+        <record id="hr_salary_rule_employee_pension_contribution" model="hr.salary.rule">
+            <field name="name">Employee Pension Contribution</field>
+            <field name="code">EE_PENSION</field>
+            <field name="category_id" ref="hr_payroll.DED"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = contract.employee_pension_contribution > 0</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">result = -contract.employee_pension_contribution</field>
+            <field name="sequence" eval="108"/>
+            <field name="struct_id" ref="ent_hr_payroll_extension.structure_002"/>
+        </record>
+
+    </data>
+</odoo>

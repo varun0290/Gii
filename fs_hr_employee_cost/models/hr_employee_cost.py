@@ -69,6 +69,11 @@ class HrEmployeeCost(models.Model):
         ('approved', 'Approved'),
         ('rejected', 'Rejected'),
     ], default='draft', required=True, tracking=True)
+    attachment_ids = fields.Many2many(
+        'ir.attachment',
+        string='Attachments',
+        tracking=True,
+    )
 
     @api.model_create_multi
     def create(self, vals_list):

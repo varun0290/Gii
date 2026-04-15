@@ -31,8 +31,14 @@ PROTECTED_CONTRACT_FIELDS = frozenset({
 class HrContract(models.Model):
     _inherit = 'hr.contract'
 
-    # Ensure notes has tracking for field change history
+    # Ensure notes and salary fields have tracking for field change history
     notes = fields.Html(tracking=True)
+    wage = fields.Monetary(tracking=True)
+    l10n_ae_housing_allowance = fields.Monetary(tracking=True)
+    l10n_ae_transportation_allowance = fields.Monetary(tracking=True)
+    l10n_ae_other_allowances = fields.Monetary(tracking=True)
+    over_day = fields.Float(tracking=True)
+    over_hour = fields.Float(tracking=True)
 
     state = fields.Selection(
         selection_add=[
@@ -78,9 +84,9 @@ class HrContract(models.Model):
     total_deductions = fields.Monetary(string="Total Deductions", compute='_compute_total_deductions', store=True, tracking=True)
 
     # --- 4. Summary ---
-    gross_salary = fields.Monetary(string="Gross Salary", compute='_compute_gross_salary', store=True)
-    net_salary = fields.Monetary(string="Net Salary", compute='_compute_net_salary', store=True)
-    total_cash_compensation = fields.Monetary(string="Total Cash Compensation", compute='_compute_total_cash_compensation', store=True)
+    gross_salary = fields.Monetary(string="Gross Salary", compute='_compute_gross_salary', store=True, tracking=True)
+    net_salary = fields.Monetary(string="Net Salary", compute='_compute_net_salary', store=True, tracking=True)
+    total_cash_compensation = fields.Monetary(string="Total Cash Compensation", compute='_compute_total_cash_compensation', store=True, tracking=True)
 
     # --- 5. Pension ---
     employer_pension_contribution = fields.Monetary(string="Employer Pension Contribution", tracking=True)

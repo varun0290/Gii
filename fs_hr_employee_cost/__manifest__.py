@@ -21,10 +21,11 @@
     ],
     "data": [
         "security/ir.model.access.csv",
-        "data/hr_cost_centre_data.xml",
+        "data/ir_sequence_data.xml",
         "views/hr_cost_centre_views.xml",
         "views/hr_employee_cost_views.xml",
         "views/hr_employee_views.xml",
+        "views/hr_contribution_views.xml",
         "views/menus.xml",
     ],
     "license": "LGPL-3",
