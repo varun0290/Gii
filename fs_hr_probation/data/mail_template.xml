@@ -30,8 +30,7 @@
             <field name="subject">Congratulations! Your Probation has been Confirmed</field>
             <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
             <field name="email_to">{{ object.employee_id.work_email }}</field>
-            <field name="report_template" ref="fs_giluat_reports.action_probation_period_review_confirmed_no_changes"/>
-            <field name="report_name">Confirmation_Letter_{{ (object.employee_id.name or '').replace('/','_') }}</field>
+            <field name="report_template_ids" eval="[(4, ref('fs_giluat_reports.action_probation_period_review_confirmed_no_changes'))]"/>
             <field name="body_html" type="html">
                 <div style="margin: 0px; padding: 0px;">
                     <p style="margin: 0px; padding: 0px; font-size: 13px;">

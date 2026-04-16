@@ -123,6 +123,7 @@
         <field name="paperformat_id" ref="fs_giluat_reports.paperformat_a4_report"/>
         <field name="binding_model_id" ref="hr.model_hr_employee"/>
         <field name="binding_type">report</field>
+        <field name="print_report_name">'Confirmation_Letter_%s' % (object.name or '').replace('/', '_')</field>
     </record>
 
     <record id="action_probation_period_review_confirmed_with_changes" model="ir.actions.report">
