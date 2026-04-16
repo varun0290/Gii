@@ -90,21 +90,23 @@ class Probation(models.Model):
         """
         function for checking stage changing and creating probation
         record based on contract stage
-
         """
-        if self.state == 'probation':
-            if vals.get('state') == 'open' and not self.is_approve:
-                raise UserError(_("You cannot change the status of non-approved Contracts"))
-            if vals.get('state') == 'cancel' or vals.get('state') == 'close' or vals.get('state') == 'draft':
-                raise UserError(_("You cannot change the status of non-approved Contracts"))
-        training_dtl = self.env['hr.training'].search([('employee_id', '=', self.employee_id.id)])
-        if training_dtl:
-            return super(Probation, self).write(vals)
-        if not training_dtl:
-            if self.trial_date_end and self.state == 'probation':
-                self.env['hr.training'].create({
-                    'employee_id': self.employee_id.id,
-                    'start_date': self.date_start,
-                    'end_date': self.trial_date_end,
-                })
+        if 'state' in vals:
+            new_state = vals.get('state')
+            for record in self:
+                if record.state == 'probation':
+                    if new_state == 'open' and not record.is_approve:
+                        raise UserError(_("You cannot change the status of non-approved Contracts"))
+                    if new_state in ['cancel', 'close', 'draft']:
+                        raise UserError(_("You cannot change the status of non-approved Contracts"))
+
+        for record in self:
+            training_dtl = self.env['hr.training'].search([('employee_id', '=', record.employee_id.id)], limit=1)
+            if not training_dtl:
+                if record.trial_date_end and record.state == 'probation':
+                    self.env['hr.training'].create({
+                        'employee_id': record.employee_id.id,
+                        'start_date': record.date_start,
+                        'end_date': record.trial_date_end,
+                    })
         return super(Probation, self).write(vals)
