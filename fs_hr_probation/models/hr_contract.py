@@ -99,9 +99,15 @@ class HrContract(models.Model):
             if record.probation_final_decision != 'approve':
                 raise UserError(_("Cannot confirm as full time unless the decision is 'Approve'."))
             
+            if 'is_approve' in record._fields:
+                record.with_context(skip_hr_contract_lock=True).write({'is_approve': True})
+            
             record.with_context(skip_hr_contract_lock=True).write({
                 'state': 'open',
             })
+            
+            if 'is_approve' in record._fields:
+                record.with_context(skip_hr_contract_lock=True).write({'is_approve': False})
             # Trigger communication
             record._send_confirmation_email_and_letter()
 
