@@ -26,15 +26,15 @@
         <!-- Full Time Confirmation to Employee -->
         <record id="mail_template_full_time_confirmation" model="mail.template">
             <field name="name">Probation Confirmed: Full-Time Confirmation</field>
-            <field name="model_id" ref="hr_contract.model_hr_contract"/>
+            <field name="model_id" ref="hr.model_hr_employee"/>
             <field name="subject">Congratulations! Your Probation has been Confirmed</field>
             <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
-            <field name="email_to">{{ object.employee_id.work_email }}</field>
+            <field name="email_to">{{ object.work_email }}</field>
             <field name="report_template_ids" eval="[(4, ref('fs_giluat_reports.action_probation_period_review_confirmed_no_changes'))]"/>
             <field name="body_html" type="html">
                 <div style="margin: 0px; padding: 0px;">
                     <p style="margin: 0px; padding: 0px; font-size: 13px;">
-                        Dear <t t-out="object.employee_id.name"/>,
+                        Dear <t t-out="object.name"/>,
                         <br/><br/>
                         Congratulations! We are pleased to inform you that you have successfully completed your probation period.
                         <br/><br/>

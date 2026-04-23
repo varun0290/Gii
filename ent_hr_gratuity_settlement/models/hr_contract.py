@@ -97,7 +97,7 @@ class Probation(models.Model):
                 if record.state == 'probation':
                     if new_state == 'open' and not record.is_approve:
                         raise UserError(_("You cannot change the status of non-approved Contracts"))
-                    if new_state in ['cancel', 'close', 'draft']:
+                    if new_state in ['cancel', 'close']:
                         raise UserError(_("You cannot change the status of non-approved Contracts"))
 
         for record in self:

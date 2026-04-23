@@ -116,6 +116,6 @@ class HrContract(models.Model):
         self.ensure_one()
         template = self.env.ref('fs_hr_probation.mail_template_full_time_confirmation', raise_if_not_found=False)
         if template:
-            # This template should be configured to attach the confirmation report
-            template.send_mail(self.id, force_send=True)
+            # This template is now on hr.employee to ensure correct report attachment
+            template.send_mail(self.employee_id.id, force_send=True)
         self.message_post(body=_("Employee confirmed as full-time. Confirmation email and letter sent."))
