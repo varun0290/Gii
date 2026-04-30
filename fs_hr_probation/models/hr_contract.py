@@ -1,6 +1,18 @@
 from odoo import models, fields, api, _
-from odoo.exceptions import UserError
+from odoo.exceptions import MissingError, UserError
 from dateutil.relativedelta import relativedelta
+
+
+def _many2one_id_from_read(val):
+    """read(load=False) Many2one is int OR (id, name); older paths use only tuple."""
+    if not val:
+        return False
+    if isinstance(val, int):
+        return val
+    if isinstance(val, (list, tuple)) and len(val):
+        return val[0]
+    return False
+
 
 class HrContract(models.Model):
     _inherit = 'hr.contract'
@@ -31,11 +43,7 @@ class HrContract(models.Model):
 
     def action_probation_review(self):
         self.ensure_one()
-        context = dict(self._context)
-        context.update({
-            'default_contract_id': self.id,
-        })
-        
+
         # Determine current review phase
         today = fields.Date.today()
         phase = '3'
@@ -45,8 +53,19 @@ class HrContract(models.Model):
                 phase = '5'
             elif months_passed >= 3:
                 phase = '3'
-        
-        context.update({
+
+        # Copy env context but strip stale RPC keys: another screen's active_id or
+        # default_* values (e.g. employee 361) were bleeding into the wizard create.
+        # Also set res_id=False so the web client does not reopen an old transient
+        # row (which ignores defaults and keeps a wrong contract_id).
+        wizard_context = dict(self.env.context)
+        for k in ('active_id', 'active_ids', 'active_model', 'active_domain'):
+            wizard_context.pop(k, None)
+        for k in list(wizard_context.keys()):
+            if k.startswith('default_'):
+                wizard_context.pop(k, None)
+        wizard_context.update({
+            'default_contract_id': self.id,
             'default_review_phase': phase,
         })
 
@@ -56,7 +75,8 @@ class HrContract(models.Model):
             'res_model': 'hr.contract.probation.review.wizard',
             'view_mode': 'form',
             'target': 'new',
-            'context': context,
+            'res_id': False,
+            'context': wizard_context,
         }
 
     @api.model
@@ -111,11 +131,39 @@ class HrContract(models.Model):
             # Trigger communication
             record._send_confirmation_email_and_letter()
 
+    def _probation_confirmation_report_lang(self):
+        """Partner language for mail/PDF; avoids QWeb traversing missing hr.employee rows."""
+        self.ensure_one()
+        row = self.read(['employee_id'], load=False)[0]
+        eid = _many2one_id_from_read(row.get('employee_id'))
+        if not eid:
+            return False
+        emp = self.env['hr.employee'].sudo().browse(eid)
+        if not emp.exists():
+            return False
+        user = emp.user_id
+        if not user or not user.exists() or not user.partner_id:
+            return False
+        return user.partner_id.lang or False
+
     def _send_confirmation_email_and_letter(self):
         """Send HR confirmation email and release the official letter."""
         self.ensure_one()
         template = self.env.ref('fs_hr_probation.mail_template_full_time_confirmation', raise_if_not_found=False)
-        if template:
-            # This template is now on hr.employee to ensure correct report attachment
-            template.send_mail(self.employee_id.id, force_send=True)
+        if not template:
+            self.message_post(body=_("Employee confirmed as full-time. No confirmation email (missing template)."))
+            return
+        row = self.read(['employee_id'], load=False)[0]
+        if not _many2one_id_from_read(row.get('employee_id')):
+            self.message_post(body=_("Employee confirmed as full-time. No confirmation email (no employee on contract)."))
+            return
+        lang = self._probation_confirmation_report_lang() or self.env.lang
+        try:
+            # Template + report are hr.contract; res_id must be contract id. Context lang skips fragile QWeb on employees.
+            template.with_context(lang=lang).send_mail(self.id, force_send=True)
+        except MissingError as err:
+            self.message_post(
+                body=_("Employee confirmed as full-time, but the confirmation email/PDF failed: %s") % err
+            )
+            return
         self.message_post(body=_("Employee confirmed as full-time. Confirmation email and letter sent."))

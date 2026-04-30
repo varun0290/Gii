@@ -9,6 +9,8 @@
     "category": "Base",
     "depends": [
         'hr',
+        'hr_contract',
+        'hr_payroll',
         'ent_saudi_gosi',
         'ent_uae_wps_report',
         'ent_hr_employee_updation',

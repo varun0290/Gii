@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="hr_contract_employee_view_form_update_wizard_btn" model="ir.ui.view">
+        <field name="name">hr.employee.form.contract.update.wizard</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr_contract.hr_hr_employee_view_form3"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_open_contract']" position="after">
+                <button name="action_open_contract_update_wizard"
+                    class="oe_stat_button"
+                    icon="fa-pencil-square-o"
+                    type="object"
+                    groups="hr_contract.group_hr_contract_manager"
+                    invisible="contracts_count == 0">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Update contract</span>
+                    </div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -7,7 +7,7 @@
     "summary": "Gulf Investment Reports",
     "website": "www.livbuzz.com",
     "license": "AGPL-3",
-    "depends": ['hr'],
+    "depends": ['hr', 'hr_contract'],
     "category": "Other",
     "data": [
         "report/report_noc_business_trip.xml",

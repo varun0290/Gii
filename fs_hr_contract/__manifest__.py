@@ -10,8 +10,11 @@
     'website': 'https://www.fidobe.com/',
     'depends': ['hr_contract', 'hr_payroll', 'l10n_ae_hr_payroll'],
     'data': [
+        'security/ir.model.access.csv',
         'security/security.xml',
         'views/hr_contract_view.xml',
+        'views/hr_contract_update_wizard_views.xml',
+        'views/hr_employee_views.xml',
         'data/hr_salary_rule_data.xml',
     ],
     'installable': True,

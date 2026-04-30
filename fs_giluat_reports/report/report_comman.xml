@@ -116,24 +116,24 @@
 
     <record id="action_probation_period_review_confirmed_no_changes" model="ir.actions.report">
         <field name="name">Probation Period Review - Confirmed (No Changes)</field>
-        <field name="model">hr.employee</field>
+        <field name="model">hr.contract</field>
         <field name="report_type">qweb-pdf</field>
-        <field name="report_name">fs_giluat_reports.report_probation_period_review_confirmed_no_changes</field>
-        <field name="report_file">fs_giluat_reports.report_probation_period_review_confirmed_no_changes</field>
+        <field name="report_name">fs_giluat_reports.prob_pdf_nochg</field>
+        <field name="report_file">fs_giluat_reports.prob_pdf_nochg</field>
         <field name="paperformat_id" ref="fs_giluat_reports.paperformat_a4_report"/>
-        <field name="binding_model_id" ref="hr.model_hr_employee"/>
+        <field name="binding_model_id" ref="hr_contract.model_hr_contract"/>
         <field name="binding_type">report</field>
-        <field name="print_report_name">'Confirmation_Letter_%s' % (object.name or '').replace('/', '_')</field>
+        <field name="print_report_name">'Confirmation_Letter_%s' % ((object.employee_id.name or object.name or '').replace('/', '_'))</field>
     </record>
 
     <record id="action_probation_period_review_confirmed_with_changes" model="ir.actions.report">
         <field name="name">Probation Period Review - Confirmed (With Changes)</field>
-        <field name="model">hr.employee</field>
+        <field name="model">hr.contract</field>
         <field name="report_type">qweb-pdf</field>
-        <field name="report_name">fs_giluat_reports.report_probation_period_review_confirmed_with_changes</field>
-        <field name="report_file">fs_giluat_reports.report_probation_period_review_confirmed_with_changes</field>
+        <field name="report_name">fs_giluat_reports.prob_pdf_wchg</field>
+        <field name="report_file">fs_giluat_reports.prob_pdf_wchg</field>
         <field name="paperformat_id" ref="fs_giluat_reports.paperformat_a4_report"/>
-        <field name="binding_model_id" ref="hr.model_hr_employee"/>
+        <field name="binding_model_id" ref="hr_contract.model_hr_contract"/>
         <field name="binding_type">report</field>
     </record>
 

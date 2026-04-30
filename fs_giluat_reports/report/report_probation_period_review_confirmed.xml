@@ -17,9 +17,9 @@
                 <p class="p-0 m-0 mb-5 text-justify">
                     Date: <span t-esc="datetime.date.today()" t-options="{'widget': 'date', 'format': 'dd/MM/YYYY'}"/>
                 </p>
-                <p class="p-0 m-0 mb-4 text-justify">To: <span t-field="o.name"/>,</p>
+                <p class="p-0 m-0 mb-4 text-justify">To: <span t-esc="safe_employee_name[o.id]"/>,</p>
                 <h5 class="fw-900 p-0 m-0 mb-4">Subject: Probation Period Review - Confirmed</h5>
-                <p class="p-0 m-0 mb-2 text-justify">Dear: <span t-field="o.name"/>,</p>
+                <p class="p-0 m-0 mb-2 text-justify">Dear: <span t-esc="safe_employee_name[o.id]"/>,</p>
                 <p class="p-0 m-0 mb-2 text-justify">
                     Congratulations! I am pleased to confirm that you have successfully completed your 3 or 6 month probationary period.
                 </p>
@@ -31,38 +31,38 @@
                         All current conditions within your employment agreement with our firm remain unchanged.
                     </t>
                 </p>
-                <table class="mx-5 py-3 table table-sm table-borderless" t-if="is_with_changes and o.contract_id">
+                <table class="mx-5 py-3 table table-sm table-borderless" t-if="is_with_changes and o">
                     <tr>
                         <td class="w-50 px-0 mx-0">Basic Salary:</td>
                         <td class="w-50 px-0 mx-0">
-                            <span t-field="o.contract_id.wage"/>
-                            <span t-if="o.contract_id.wage_type == 'monthly'"> / per month</span>
-                            <span t-if="o.contract_id.wage_type == 'hour'"> / per hour</span>
+                            <span t-field="o.wage"/>
+                            <span t-if="o.wage_type == 'monthly'"> / per month</span>
+                            <span t-if="o.wage_type == 'hour'"> / per hour</span>
                         </td>
                     </tr>
                     <tr>
                         <td class="w-50 px-0 mx-0">Housing Allowance:</td>
                         <td class="w-50 px-0 mx-0">
-                            <span t-field="o.contract_id.l10n_ae_housing_allowance"/>
-                            <span t-if="o.contract_id.wage_type == 'monthly'"> / per month</span>
-                            <span t-if="o.contract_id.wage_type == 'hour'"> / per hour</span>
+                            <span t-field="o.l10n_ae_housing_allowance"/>
+                            <span t-if="o.wage_type == 'monthly'"> / per month</span>
+                            <span t-if="o.wage_type == 'hour'"> / per hour</span>
                         </td>
                     </tr>
                     <tr>
                         <td class="w-50 px-0 mx-0">Other Allowances:</td>
                         <td class="w-50 px-0 mx-0">
-                            <span t-field="o.contract_id.l10n_ae_other_allowances"/>
-                            <span t-if="o.contract_id.wage_type == 'monthly'"> / per month</span>
-                            <span t-if="o.contract_id.wage_type == 'hour'"> / per hour</span>
+                            <span t-field="o.l10n_ae_other_allowances"/>
+                            <span t-if="o.wage_type == 'monthly'"> / per month</span>
+                            <span t-if="o.wage_type == 'hour'"> / per hour</span>
                         </td>
                     </tr>
                     <tr>
                         <td class="w-50 px-0 mx-0">New Total Gross Salary:</td>
                         <td class="w-50 px-0 mx-0">
-                            <span t-esc="o.contract_id.wage + o.contract_id.l10n_ae_housing_allowance + o.contract_id.l10n_ae_other_allowances"
-                                t-options="{'widget': 'monetary', 'display_currency': o.contract_id.currency_id}" />
-                            <span t-if="o.contract_id.wage_type == 'monthly'"> / per month</span>
-                            <span t-if="o.contract_id.wage_type == 'hour'"> / per hour</span>
+                            <span t-esc="o.wage + o.l10n_ae_housing_allowance + o.l10n_ae_other_allowances"
+                                t-options="{'widget': 'monetary', 'display_currency': o.currency_id}" />
+                            <span t-if="o.wage_type == 'monthly'"> / per month</span>
+                            <span t-if="o.wage_type == 'hour'"> / per hour</span>
                         </td>
                     </tr>
                 </table>
@@ -89,7 +89,7 @@
                         <td class="w-50 bcb">
                             <p class="p-0 m-0 text-center fw-900">
                                 <br/><br/><br/><br/><br/><br/>
-                                <span class="border-top bcb p-0 m-0 pt-1" t-field="o.name"/>
+                                <span class="border-top bcb p-0 m-0 pt-1" t-esc="safe_employee_name[o.id]"/>
                             </p>
                         </td>
                     </tr>
@@ -97,26 +97,17 @@
             </div>
         </t>
     </template>
-    <template id="report_probation_period_review_confirmed_with_changes">
+    <template id="prob_pdf_wchg">
         <t t-call="web.html_container">
-            <t t-set="is_with_changes" t-value="True"/>
             <t t-foreach="docs" t-as="o">
-                <t t-set="lang" t-value="False"/>
-                <t t-if="o.user_id and o.user_id.partner_id">
-                    <t t-set="lang" t-value="o.user_id.partner_id.sudo().lang"/>
-                </t>
-                <t t-call="fs_giluat_reports.report_probation_period_review_confirmed_doc" t-lang="lang"/>
+                <t t-call="fs_giluat_reports.report_probation_period_review_confirmed_doc"/>
             </t>
         </t>
     </template>
-    <template id="report_probation_period_review_confirmed_no_changes">
+    <template id="prob_pdf_nochg">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
-                <t t-set="lang" t-value="False"/>
-                <t t-if="o.user_id and o.user_id.partner_id">
-                    <t t-set="lang" t-value="o.user_id.partner_id.sudo().lang"/>
-                </t>
-                <t t-call="fs_giluat_reports.report_probation_period_review_confirmed_doc" t-lang="lang"/>
+                <t t-call="fs_giluat_reports.report_probation_period_review_confirmed_doc"/>
             </t>
         </t>
     </template>

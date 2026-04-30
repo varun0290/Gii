@@ -9,12 +9,22 @@ class HrContractProbationReviewWizard(models.TransientModel):
         ('3', '3rd Month'),
         ('5', '5th Month')
     ], string="Review Phase", required=True)
-    
+
     feedback = fields.Text(string="Feedback", required=True)
     decision = fields.Selection([
         ('approve', 'Approve as Full Time'),
         ('reject', 'Reject')
     ], string="Final Decision")
+
+    @api.model
+    def default_get(self, fields_list):
+        res = super().default_get(fields_list)
+        cid = self.env.context.get('default_contract_id')
+        if cid and 'contract_id' in fields_list:
+            contract = self.env['hr.contract'].browse(cid).exists()
+            if contract:
+                res['contract_id'] = contract.id
+        return res
 
     def action_submit_review(self):
         self.ensure_one()
@@ -30,11 +40,11 @@ class HrContractProbationReviewWizard(models.TransientModel):
                 'probation_final_decision': self.decision,
                 'probation_review_5_done': True,
             })
-        
+
         self.contract_id.with_context(skip_hr_contract_lock=True).write(vals)
-        
+
         # If approved in 5th month, automatically advance to Running (Open)
         if self.review_phase == '5' and self.decision == 'approve':
             self.contract_id.action_confirm_full_time()
-        
+
         return {'type': 'ir.actions.act_window_close'}

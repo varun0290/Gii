@@ -69,4 +69,15 @@
             </xpath>
         </field>
     </record>
+
+    <record id="hr_employee_view_tree_registration_number" model="ir.ui.view">
+        <field name="name">hr.employee.tree.registration.number</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr_contract.view_employee_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='first_contract_date']" position="before">
+                <field name="registration_number"/>
+            </xpath>
+        </field>
+    </record>
 </odoo>

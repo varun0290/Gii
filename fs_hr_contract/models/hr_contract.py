@@ -234,7 +234,7 @@ class HrContract(models.Model):
                     return orig_key(rec)
                 except KeyError as e:
                     field_val = str(e).strip("'\"")
-                    if field_val in ('wait_hr', 'wait_finance'):
+                    if field_val in ('wait_hr', 'wait_finance', 'probation'):
                         return 3 # 'draft' priority
                     raise e
             return super().sorted(key=wrapped_key, reverse=reverse)
