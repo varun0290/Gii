@@ -90,11 +90,13 @@
                             <separator string="Web API — GetDeviceLogs JSON"
                                        invisible="connection_mode != 'web_api'"/>
                             <div class="text-muted mb-2" invisible="connection_mode != 'web_api'">
-                                Expects objects with <code>EmployeeCode</code>, <code>LogDate</code>
-                                (<code>YYYY-MM-DD HH:MM:SS</code>), <code>PunchDirection</code>
-                                (<code>in</code>/<code>out</code> or blank), and optional
-                                <code>SerialNumber</code>, <code>Temperature</code>,
-                                <code>TemperatureState</code>.
+                                Rows match your gateway JSON:
+                                <code>EmployeeCode</code>, <code>LogDate</code>
+                                (<code>YYYY-MM-DD HH:MM:SS</code>),
+                                optional <code>SerialNumber</code>,
+                                <code>PunchDirection</code>
+                                (<code>in</code>/<code>out</code> or blank for undirected),
+                                plus <code>Temperature</code> / <code>TemperatureState</code> (stored but not used).
                             </div>
                             <group invisible="connection_mode != 'web_api'">
                                 <group>
@@ -106,6 +108,9 @@
                                     <field name="web_api_days_back"/>
                                     <field name="web_api_serial_filter"
                                            placeholder="Leave empty for all readers"/>
+                                    <field name="web_api_ignored_employee_codes"
+                                           placeholder="Comma or line list, e.g. 8888, 99999, 999999"
+                                           colspan="2"/>
                                 </group>
                             </group>
 

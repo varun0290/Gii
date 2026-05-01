@@ -90,6 +90,11 @@ class BiometricDeviceDetails(models.Model):
         help="Optional SerialNumber from the API JSON. When set, punch rows "
         "from other readers are ignored.",
     )
+    web_api_ignored_employee_codes = fields.Text(
+        string="Ignored EmployeeCode list",
+        help="Optional — one code per line or comma-separated. Rows whose "
+        "EmployeeCode matches exactly (e.g. test cards 8888, 99999) are skipped.",
+    )
     attendance_tz = fields.Char(
         string="Attendance timezone",
         help="IANA name for naive timestamps from the device or API "
@@ -264,13 +269,79 @@ class BiometricDeviceDetails(models.Model):
     def _parse_web_api_log_datetime(self, log_date_str):
         if not log_date_str:
             return None
+        if isinstance(log_date_str, datetime):
+            return (
+                log_date_str.replace(tzinfo=None)
+                if log_date_str.tzinfo
+                else log_date_str
+            )
+        if isinstance(log_date_str, date) and not isinstance(log_date_str, datetime):
+            return datetime.combine(log_date_str, datetime.min.time())
         log_date_str = str(log_date_str).strip()
-        for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S.%f", "%d/%m/%Y %H:%M:%S"):
+        log_date_str_norm = log_date_str.replace("T", " ")
+        for fmt in (
+            "%Y-%m-%d %H:%M:%S",
+            "%Y-%m-%d %H:%M:%S.%f",
+            "%d/%m/%Y %H:%M:%S",
+            "%Y-%m-%d",
+        ):
             try:
-                return datetime.strptime(log_date_str, fmt)
+                return datetime.strptime(log_date_str_norm, fmt)
             except ValueError:
                 continue
         return None
+
+    def _web_api_ignored_employee_codes_set(self):
+        """Parse Text field as comma or newline separated exact EmployeeCode skips."""
+        self.ensure_one()
+        raw = (self.web_api_ignored_employee_codes or "").replace(",", "\n")
+        return {x.strip() for x in raw.splitlines() if x.strip()}
+
+    @staticmethod
+    def _api_coerce_employee_code(value):
+        """GetDeviceLogs EmployeeCode — keep full value for hr.employee.device_id_num."""
+        if value is None or value is False:
+            return None
+        if isinstance(value, bool):
+            return None
+        if isinstance(value, float):
+            if value.is_integer():
+                value = int(value)
+            else:
+                s = str(value).strip()
+                return s or None
+        if isinstance(value, int):
+            return str(value)
+        s = str(value).strip()
+        return s or None
+
+    @staticmethod
+    def _api_row_serial_number(row):
+        return str(
+            row.get("SerialNumber") or row.get("serialNumber") or ""
+        ).strip()
+
+    def _api_normalize_punch_direction(self, raw):
+        """
+        GetDeviceLogs PunchDirection: blank = undirected punch; 'in' / 'out'.
+        """
+        if raw is None:
+            return "neutral"
+        if isinstance(raw, (int, float)):
+            return "neutral"
+        s = str(raw).strip().lower()
+        if not s:
+            return "neutral"
+        if s in ("in", "i", "checkin", "check-in", "check_in", "cin"):
+            return "in"
+        if s in ("out", "o", "checkout", "check-out", "check_out", "cout"):
+            return "out"
+        return "neutral"
+
+    def _api_row_log_datetime(self, row):
+        return self._parse_web_api_log_datetime(
+            row.get("LogDate") or row.get("logDate")
+        )
 
     def _fetch_web_api_device_logs(self, from_dt, to_dt):
         """GET GetDeviceLogs and return decoded JSON rows (list)."""
@@ -295,6 +366,7 @@ class BiometricDeviceDetails(models.Model):
             raise UserError(_("Web API HTTP error (%s): %s") % (e.code, e.reason)) from e
         except urllib.error.URLError as e:
             raise UserError(_("Web API unreachable: %s") % e.reason) from e
+        body = body.lstrip("\ufeff").strip()
         try:
             parsed = json.loads(body)
         except json.JSONDecodeError as e:
@@ -302,7 +374,12 @@ class BiometricDeviceDetails(models.Model):
         if isinstance(parsed, list):
             return parsed
         if isinstance(parsed, dict):
-            rows = parsed.get("Data") or parsed.get("logs") or parsed.get("records")
+            rows = (
+                parsed.get("data")
+                or parsed.get("Data")
+                or parsed.get("logs")
+                or parsed.get("records")
+            )
             if isinstance(rows, list):
                 return rows
         raise UserError(_("Unexpected Web API response shape; expected JSON list."))
@@ -318,6 +395,7 @@ class BiometricDeviceDetails(models.Model):
         """
         self.ensure_one()
         serial_required = (self.web_api_serial_filter or "").strip()
+        skipped_codes = self._web_api_ignored_employee_codes_set()
         day_buckets = defaultdict(
             lambda: {
                 "in_times": [],
@@ -326,36 +404,31 @@ class BiometricDeviceDetails(models.Model):
             }
         )
 
-        ec_key = lambda row: row.get("EmployeeCode") or row.get("employeeCode")
-
-        def row_direction(row):
-            d = row.get("PunchDirection") or row.get("punchDirection") or ""
-            return str(d).strip().lower()
-
         for row in log_rows:
             if not isinstance(row, dict):
                 continue
             if serial_required:
-                row_serial = (
-                    row.get("SerialNumber") or row.get("serialNumber") or ""
-                )
-                if str(row_serial).strip() != serial_required:
+                if self._api_row_serial_number(row) != serial_required:
                     continue
-            code_raw = ec_key(row)
-            if code_raw is None:
-                continue
-            cleaned_uid = self.clean_user_id(code_raw)
-            if not cleaned_uid:
-                cleaned_uid = str(code_raw).strip()
-                if not cleaned_uid:
-                    continue
-            ts = self._parse_web_api_log_datetime(
-                row.get("LogDate") or row.get("logDate") or ""
+
+            emp_code = self._api_coerce_employee_code(
+                row.get("EmployeeCode") or row.get("employeeCode")
             )
+            if not emp_code:
+                continue
+
+            if emp_code in skipped_codes:
+                continue
+
+            ts = self._api_row_log_datetime(row)
             if not ts:
                 continue
-            bucket = day_buckets[(cleaned_uid, ts.date())]
-            direction = row_direction(row)
+            bucket_key = (emp_code, ts.date())
+            direction_raw = row.get("PunchDirection")
+            if direction_raw is None:
+                direction_raw = row.get("punchDirection")
+            direction = self._api_normalize_punch_direction(direction_raw)
+            bucket = day_buckets[bucket_key]
             if direction == "in":
                 bucket["in_times"].append(ts)
             elif direction == "out":
