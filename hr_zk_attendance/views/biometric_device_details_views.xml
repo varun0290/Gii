@@ -1,78 +1,148 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-    <!--Biometric device configuration list view-->
     <record id="biometric_device_details_view_list" model="ir.ui.view">
-        <field name="name">biometric.device.details.view.list</field>
+        <field name="name">biometric.device.details.view.tree</field>
         <field name="model">biometric.device.details</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree string="Biometric integrations">
                 <field name="name"/>
+                <field name="company_id" groups="base.group_multi_company"/>
                 <field name="connection_mode"/>
-                <field name="device_ip"/>
-                <field name="port_number"/>
-                <field name="company_id"/>
+                <field name="last_sync_at" optional="hide"/>
+                <field name="last_sync_period" optional="hide"/>
+                <field name="device_ip" optional="show"/>
+                <field name="port_number" optional="hide"/>
+                <field name="web_api_base_url" optional="hide"/>
             </tree>
         </field>
     </record>
-    <!--Biometric device configuration form view-->
+
     <record id="biometric_device_details_view_form" model="ir.ui.view">
         <field name="name">biometric.device.details.view.form</field>
         <field name="model">biometric.device.details</field>
         <field name="arch" type="xml">
-            <form>
+            <form string="Biometric integration">
                 <header>
-                    <button name="action_set_timezone" string=" Set Time"
-                            type="object" class="oe_highlight"
-                            invisible="connection_mode != 'zk'"/>
                     <button name="action_download_attendance"
-                            string="Download Data"
-                            type="object" class="oe_highlight"/>
-                    <button name="action_clear_attendance" string="Delete Attendance"
-                            type="object" class="oe_highlight"
+                            string="Sync now (auto range)"
+                            type="object"
+                            class="btn-primary"
+                            invisible="connection_mode != 'web_api'"
+                            title="Uses lookback below: FromDate = today − days, ToDate = today"/>
+                    <button name="action_open_fetch_by_date_wizard"
+                            string="Fetch by dates…"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="connection_mode != 'web_api'"/>
+                    <button name="action_download_attendance"
+                            string="Download from reader"
+                            type="object"
+                            class="btn-primary"
                             invisible="connection_mode != 'zk'"/>
-                    <button name="action_restart_device" string="Restart"
-                            type="object" class="oe_highlight"
-                            confirm="Are you sure you want Restart the Biometric
-                            Device?" invisible="connection_mode != 'zk'"/>
+                    <button name="action_set_timezone" string="Set device time"
+                            type="object" class="btn-secondary"
+                            invisible="connection_mode != 'zk'"/>
+                    <button name="action_clear_attendance" string="Clear reader log"
+                            type="object"
+                            invisible="connection_mode != 'zk'"/>
+                    <button name="action_restart_device" string="Restart reader"
+                            type="object"
+                            confirm="Restart the biometric device?"
+                            invisible="connection_mode != 'zk'"/>
                 </header>
                 <sheet>
-                    <group string="Identification">
-                        <field name="name"/>
-                        <field name="company_id"/>
-                        <field name="address_id"/>
-                    </group>
-                    <group string="Integration mode">
-                        <field name="connection_mode" widget="radio"/>
-                        <field name="attendance_tz"
-                               placeholder="e.g. Asia/Kolkata"/>
-                    </group>
-                    <group string="ZK TCP Device" invisible="connection_mode != 'zk'">
-                        <field name="device_ip"/>
-                        <field name="port_number"/>
-                    </group>
-                    <group string="Web API (GetDeviceLogs)"
+                    <div class="oe_title mb-3">
+                        <label for="name" string="Integration name"/>
+                        <h1>
+                            <field name="name" class="oe_inline text-break"
+                                   placeholder="e.g. HQ — Main gate"/>
+                        </h1>
+                    </div>
+
+                    <group name="web_status" string="Last synchronization (Web API)"
                            invisible="connection_mode != 'web_api'">
-                        <field name="web_api_base_url"
-                               placeholder="http://122.166.44.18:85"
-                               help='Host and optional port without trailing slashes. Calls /api/v2/WebAPI/GetDeviceLogs with parameters APIKey, FromDate (YYYY-MM-DD), ToDate (YYYY-MM-DD). Set Attendance timezone to match the clock on device logs.'/>
-                        <field name="web_api_key" password="True"/>
-                        <field name="web_api_days_back"/>
+                        <group>
+                            <field name="last_sync_at"/>
+                            <field name="last_sync_period"/>
+                        </group>
+                        <group>
+                            <field name="last_sync_device_log_count"/>
+                            <field name="last_sync_daily_rows"/>
+                        </group>
                     </group>
-                    <separator string="Last sync preview"/>
-                    <field name="attendance_data"/>
-                    <button name="action_test_connection"
-                            type="object" class="btn btn-secondary">
-                        <i class="fa fa-fw o_button_icon fa-television"/>
-                        Test Connection
-                    </button>
+
+                    <notebook>
+                        <page string="Connection" name="connection">
+                            <group>
+                                <group string="Organisation">
+                                    <field name="company_id" groups="base.group_multi_company"/>
+                                    <field name="address_id"/>
+                                </group>
+                                <group string="How attendance is loaded">
+                                    <field name="connection_mode" widget="radio"
+                                           options="{'horizontal': true}"/>
+                                    <field name="attendance_tz"
+                                           placeholder="Asia/Kolkata"
+                                           help="Wall clock used for LogDate without timezone offset."/>
+                                </group>
+                            </group>
+
+                            <separator string="Web API — GetDeviceLogs JSON"
+                                       invisible="connection_mode != 'web_api'"/>
+                            <div class="text-muted mb-2" invisible="connection_mode != 'web_api'">
+                                Expects objects with <code>EmployeeCode</code>, <code>LogDate</code>
+                                (<code>YYYY-MM-DD HH:MM:SS</code>), <code>PunchDirection</code>
+                                (<code>in</code>/<code>out</code> or blank), and optional
+                                <code>SerialNumber</code>, <code>Temperature</code>,
+                                <code>TemperatureState</code>.
+                            </div>
+                            <group invisible="connection_mode != 'web_api'">
+                                <group>
+                                    <field name="web_api_base_url"
+                                           placeholder="http://host:port"/>
+                                    <field name="web_api_key" password="True"/>
+                                </group>
+                                <group>
+                                    <field name="web_api_days_back"/>
+                                    <field name="web_api_serial_filter"
+                                           placeholder="Leave empty for all readers"/>
+                                </group>
+                            </group>
+
+                            <separator string="ZK TCP device" invisible="connection_mode != 'zk'"/>
+                            <group invisible="connection_mode != 'zk'">
+                                <group>
+                                    <field name="device_ip"/>
+                                    <field name="port_number"/>
+                                </group>
+                            </group>
+
+                            <separator string="Diagnostics"/>
+                            <button name="action_test_connection"
+                                    type="object"
+                                    string="Test connection"
+                                    class="btn-link ps-0"
+                                    icon="fa-plug"/>
+                        </page>
+
+                        <page string="Consolidated preview" name="preview">
+                            <field name="attendance_data" nolabel="1" readonly="1"
+                                   placeholder="Run a sync to see one row per employee per work day (first in / last out)."/>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
     </record>
-    <!--	Action for the biometric device-->
+
     <record id="biometric_device_details_action" model="ir.actions.act_window">
-        <field name="name">Biometric Device</field>
+        <field name="name">Biometric devices</field>
         <field name="res_model">biometric.device.details</field>
         <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Connect a ZK reader or a Web API that returns GetDeviceLogs-style JSON.
+            </p>
+        </field>
     </record>
 </odoo>

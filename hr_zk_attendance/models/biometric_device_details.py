@@ -80,10 +80,15 @@ class BiometricDeviceDetails(models.Model):
         help="Value for the APIKey query parameter.",
     )
     web_api_days_back = fields.Integer(
-        string="Web API days to fetch",
+        string="Auto-sync lookback (days)",
         default=1,
-        help="Inclusive date range ending today when downloading via API "
-        "(FromDate=today − N days, ToDate=today).",
+        help="Scheduled / “Sync now”: FromDate = today minus this many "
+        "calendar days, ToDate = today (inclusive).",
+    )
+    web_api_serial_filter = fields.Char(
+        string="Restrict to device serial",
+        help="Optional SerialNumber from the API JSON. When set, punch rows "
+        "from other readers are ignored.",
     )
     attendance_tz = fields.Char(
         string="Attendance timezone",
@@ -111,7 +116,27 @@ class BiometricDeviceDetails(models.Model):
         default=lambda self: self.env.user.company_id.id,
         help="Current Company",
     )
-    attendance_data = fields.Text(string="Attendance Data")
+    attendance_data = fields.Text(
+        string="Last sync preview",
+        readonly=True,
+        help="JSON preview of the latest consolidated employee-days after sync.",
+    )
+    last_sync_at = fields.Datetime(
+        string="Last sync",
+        readonly=True,
+        help="UTC time when Odoo last pulled from the Web API on this record.",
+    )
+    last_sync_period = fields.Char(string="Last synced period", readonly=True)
+    last_sync_device_log_count = fields.Integer(
+        string="Rows in last payload",
+        readonly=True,
+        help="Number of punch rows returned by GetDeviceLogs in the last run.",
+    )
+    last_sync_daily_rows = fields.Integer(
+        string="Consolidated days (last run)",
+        readonly=True,
+        help="Employee calendar days written/updated in the last run.",
+    )
 
     @api.constrains(
         "connection_mode",
@@ -284,11 +309,15 @@ class BiometricDeviceDetails(models.Model):
 
     def aggregate_web_api_logs_first_in_last_out(self, log_rows):
         """
-        First punch-in per (employee code, calendar day): earliest time with
-        PunchDirection indicating 'in' (case-insensitive), else earliest punch.
-        Last punch-out: latest 'out'; if none, latest punch overall.
+        Consume GetDeviceLogs rows shaped like:
+          EmployeeCode, LogDate, SerialNumber, PunchDirection, Temperature,
+          TemperatureState (camelCase variants are also accepted).
+
+        First punch-in per (employee code, day): earliest PunchDirection 'in',
+        else earliest time. Last punch-out: latest 'out'; if none, latest punch.
         """
         self.ensure_one()
+        serial_required = (self.web_api_serial_filter or "").strip()
         day_buckets = defaultdict(
             lambda: {
                 "in_times": [],
@@ -306,6 +335,12 @@ class BiometricDeviceDetails(models.Model):
         for row in log_rows:
             if not isinstance(row, dict):
                 continue
+            if serial_required:
+                row_serial = (
+                    row.get("SerialNumber") or row.get("serialNumber") or ""
+                )
+                if str(row_serial).strip() != serial_required:
+                    continue
             code_raw = ec_key(row)
             if code_raw is None:
                 continue
@@ -373,25 +408,60 @@ class BiometricDeviceDetails(models.Model):
         )
         return aggregated_records
 
+    def _sync_web_api_date_range(self, from_date, to_date):
+        """Pull GetDeviceLogs for [from_date, to_date], consolidate, write hr.attendance."""
+        self.ensure_one()
+        if self.connection_mode != "web_api":
+            raise UserError(_("This device is not configured for Web API sync."))
+        log_rows = self._fetch_web_api_device_logs(from_date, to_date)
+        aggregated = self.aggregate_web_api_logs_first_in_last_out(log_rows)
+        preview = [
+            {
+                "user_id": r["user_id"],
+                "employee_code": r["user_id"],
+                "work_date": str(r["date"]),
+                "check_in": r["check_in"].isoformat(),
+                "check_out": r["check_out"].isoformat(),
+            }
+            for r in aggregated
+        ]
+        period = _("%(f)s → %(t)s") % {
+            "f": fields.Date.to_string(from_date),
+            "t": fields.Date.to_string(to_date),
+        }
+        self.write(
+            {
+                "attendance_data": json.dumps(preview, indent=2),
+                "last_sync_at": fields.Datetime.now(),
+                "last_sync_period": period,
+                "last_sync_device_log_count": len(log_rows),
+                "last_sync_daily_rows": len(aggregated),
+            }
+        )
+        self._apply_aggregated_to_hr_attendance(aggregated)
+        return {"raw_logs": len(log_rows), "daily_rows": len(aggregated)}
+
     def _web_api_download_attendance(self):
         self.ensure_one()
         days_back = max(0, int(self.web_api_days_back or 0))
         to_date = fields.Date.today()
         from_date = to_date - relativedelta(days=days_back)
-        log_rows = self._fetch_web_api_device_logs(from_date, to_date)
-        aggregated = self.aggregate_web_api_logs_first_in_last_out(log_rows)
-        self.attendance_data = json.dumps(
-            [
-                {
-                    "user_id": r["user_id"],
-                    "date": str(r["date"]),
-                    "check_in": r["check_in"].isoformat(),
-                    "check_out": r["check_out"].isoformat(),
-                }
-                for r in aggregated
-            ]
-        )
-        self._apply_aggregated_to_hr_attendance(aggregated)
+        return self._sync_web_api_date_range(from_date, to_date)
+
+    def action_open_fetch_by_date_wizard(self):
+        self.ensure_one()
+        if self.connection_mode != "web_api":
+            raise UserError(
+                _("Open this wizard only for devices using Web API integration.")
+            )
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Fetch by date"),
+            "res_model": "biometric.attendance.fetch.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {"default_device_id": self.id},
+        }
 
     def device_connect(self, zk):
         """Function for connecting the device with Odoo"""
@@ -666,11 +736,27 @@ class BiometricDeviceDetails(models.Model):
                     self.name,
                     self.company_id.name,
                 )
-                self._web_api_download_attendance()
+                stats = self._web_api_download_attendance()
                 _logger.info(
                     "action_download_attendance: Web API attendance sync completed"
                 )
-                return True
+                msg = _(
+                    "%(raw)s punch rows pulled; %(day)s employee-day attendances "
+                    "updated in Odoo (lookback: %(lookback)s day(s))."
+                ) % {
+                    "raw": stats["raw_logs"],
+                    "day": stats["daily_rows"],
+                    "lookback": self.web_api_days_back,
+                }
+                return {
+                    "type": "ir.actions.client",
+                    "tag": "display_notification",
+                    "params": {
+                        "message": msg,
+                        "type": "success",
+                        "sticky": False,
+                    },
+                }
 
         except Exception as e:
             _logger.exception("action_download_attendance: Web API error: %s", e)

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_biometric_attendance_fetch_wizard" model="ir.ui.view">
+        <field name="name">biometric.attendance.fetch.wizard.form</field>
+        <field name="model">biometric.attendance.fetch.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Fetch biometric attendance">
+                <group>
+                    <field name="device_id"/>
+                </group>
+                <group string="Date range">
+                    <group>
+                        <field name="date_from"/>
+                    </group>
+                    <group>
+                        <field name="date_to"/>
+                    </group>
+                </group>
+                <div class="alert alert-info mb-0" role="status">
+                    Sends <code>FromDate</code> and <code>ToDate</code> to your GetDeviceLogs endpoint.
+                    Rows use <code>EmployeeCode</code>, <code>LogDate</code>,
+                    <code>PunchDirection</code> (optional: <code>SerialNumber</code>, temperature fields).
+                </div>
+                <footer>
+                    <button name="action_fetch_attendance" type="object" string="Fetch attendance"
+                            class="btn-primary"/>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

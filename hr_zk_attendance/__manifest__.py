@@ -21,7 +21,7 @@
 ################################################################################
 {
     'name': 'Biometric Device Integration',
-    'version': '17.0.1.1.0',
+    'version': '17.0.1.2.0',
     'category': 'Human Resources',
     'summary': "Integrating Biometric Device (Model: ZKteco uFace 202) With HR"
                "Attendance (Face + Thumb)",
@@ -38,6 +38,7 @@
         'data/ir_cron_data.xml',
         'security/ir.model.access.csv',
         'views/biometric_device_details_views.xml',
+        'views/biometric_attendance_fetch_wizard_views.xml',
         'views/hr_employee_views.xml',
         'views/daily_attendance_views.xml',
         'views/biometric_device_attendance_menus.xml',
