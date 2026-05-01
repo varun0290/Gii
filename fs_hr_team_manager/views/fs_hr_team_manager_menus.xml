@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Offer the same entry points as HR Officers where menus were restricted to those groups. -->
+    <record id="hr.menu_hr_employee_payroll" model="ir.ui.menu">
+        <field name="groups_id" eval="[(4, ref('fs_hr_team_manager.group_fs_hr_team_manager'))]"/>
+    </record>
+
+    <record id="hr_contract.hr_menu_contract" model="ir.ui.menu">
+        <field name="groups_id" eval="[(4, ref('fs_hr_team_manager.group_fs_hr_team_manager'))]"/>
+    </record>
+
+    <record id="hr_holidays.menu_hr_holidays_management" model="ir.ui.menu">
+        <field name="groups_id" eval="[(4, ref('fs_hr_team_manager.group_fs_hr_team_manager'))]"/>
+    </record>
+
+    <record id="hr_holidays.hr_holidays_menu_manager_approve_allocations" model="ir.ui.menu">
+        <field name="groups_id" eval="[(4, ref('fs_hr_team_manager.group_fs_hr_team_manager'))]"/>
+    </record>
+
+    <record id="hr_holidays.menu_hr_holidays_report" model="ir.ui.menu">
+        <field name="groups_id" eval="[(4, ref('fs_hr_team_manager.group_fs_hr_team_manager'))]"/>
+    </record>
+
+    <record id="hr_work_entry_contract_enterprise.menu_hr_payroll_root" model="ir.ui.menu">
+        <field name="groups_id" eval="[(4, ref('fs_hr_team_manager.group_fs_hr_team_manager'))]"/>
+    </record>
+</odoo>

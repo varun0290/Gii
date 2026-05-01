@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--Biometric device configuration list view-->
+    <record id="biometric_device_details_view_list" model="ir.ui.view">
+        <field name="name">biometric.device.details.view.list</field>
+        <field name="model">biometric.device.details</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="connection_mode"/>
+                <field name="device_ip"/>
+                <field name="port_number"/>
+                <field name="company_id"/>
+            </tree>
+        </field>
+    </record>
+    <!--Biometric device configuration form view-->
+    <record id="biometric_device_details_view_form" model="ir.ui.view">
+        <field name="name">biometric.device.details.view.form</field>
+        <field name="model">biometric.device.details</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_set_timezone" string=" Set Time"
+                            type="object" class="oe_highlight"
+                            invisible="connection_mode != 'zk'"/>
+                    <button name="action_download_attendance"
+                            string="Download Data"
+                            type="object" class="oe_highlight"/>
+                    <button name="action_clear_attendance" string="Delete Attendance"
+                            type="object" class="oe_highlight"
+                            invisible="connection_mode != 'zk'"/>
+                    <button name="action_restart_device" string="Restart"
+                            type="object" class="oe_highlight"
+                            confirm="Are you sure you want Restart the Biometric
+                            Device?" invisible="connection_mode != 'zk'"/>
+                </header>
+                <sheet>
+                    <group string="Identification">
+                        <field name="name"/>
+                        <field name="company_id"/>
+                        <field name="address_id"/>
+                    </group>
+                    <group string="Integration mode">
+                        <field name="connection_mode" widget="radio"/>
+                        <field name="attendance_tz"
+                               placeholder="e.g. Asia/Kolkata"/>
+                    </group>
+                    <group string="ZK TCP Device" invisible="connection_mode != 'zk'">
+                        <field name="device_ip"/>
+                        <field name="port_number"/>
+                    </group>
+                    <group string="Web API (GetDeviceLogs)"
+                           invisible="connection_mode != 'web_api'">
+                        <field name="web_api_base_url"
+                               placeholder="http://122.166.44.18:85"
+                               help='Host and optional port without trailing slashes. Calls /api/v2/WebAPI/GetDeviceLogs with parameters APIKey, FromDate (YYYY-MM-DD), ToDate (YYYY-MM-DD). Set Attendance timezone to match the clock on device logs.'/>
+                        <field name="web_api_key" password="True"/>
+                        <field name="web_api_days_back"/>
+                    </group>
+                    <separator string="Last sync preview"/>
+                    <field name="attendance_data"/>
+                    <button name="action_test_connection"
+                            type="object" class="btn btn-secondary">
+                        <i class="fa fa-fw o_button_icon fa-television"/>
+                        Test Connection
+                    </button>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!--	Action for the biometric device-->
+    <record id="biometric_device_details_action" model="ir.actions.act_window">
+        <field name="name">Biometric Device</field>
+        <field name="res_model">biometric.device.details</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

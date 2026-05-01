@@ -1,13 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="hr_contract_form_inherit_cutoff" model="ir.ui.view">
-        <field name="name">hr.contract.form.inherit.cutoff</field>
+    <record id="hr_contract_form_inherit_payroll_calendar" model="ir.ui.view">
+        <field name="name">hr.contract.form.payroll.eligibility.preview</field>
         <field name="model">hr.contract</field>
         <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
+        <field name="priority">45</field>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='probation_period_months']" position="after">
-                <field name="cut_off_override" groups="hr_payroll.group_hr_payroll_manager"/>
-                <field name="manual_first_salary_month" invisible="not cut_off_override" groups="hr_payroll.group_hr_payroll_manager"/>
+            <xpath expr="//notebook" position="inside">
+                <page string="Payroll &amp; timing"
+                      name="payroll_eligibility"
+                      groups="hr_payroll.group_hr_payroll_user">
+                    <field name="payroll_dates_locked" invisible="1"/>
+                    <div class="alert alert-light border mb-3" role="status">
+                        Previews show the <strong>first</strong> booking and salary months from contract start using
+                        payroll settings (salary vs booking cut-offs). Live payslips may differ by period—see each payslip’s
+                        <em>Payroll timing</em> tab.
+                    </div>
+                    <div class="alert alert-warning mb-3" role="status"
+                         invisible="not payroll_dates_locked">
+                        <strong>Overrides are locked.</strong>
+                        Eligibility overrides cannot change once a Done or Paid payslip exists on this contract.
+                    </div>
+                    <group>
+                        <group string="Preview from contract">
+                            <field name="preview_payroll_booking_month" readonly="1"/>
+                            <field name="preview_first_salary_payment_month" readonly="1"/>
+                            <field name="preview_eos_accrual_start_date" readonly="1"/>
+                        </group>
+                        <group string="Contract overrides">
+                            <field name="cut_off_override" readonly="payroll_dates_locked"/>
+                            <field name="manual_first_salary_month"
+                                   invisible="not cut_off_override"
+                                   readonly="payroll_dates_locked"/>
+                        </group>
+                    </group>
+                </page>
             </xpath>
         </field>
     </record>

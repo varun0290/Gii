@@ -4,30 +4,137 @@
         <field name="name">hr.payslip.run.form.inherit.approval</field>
         <field name="model">hr.payslip.run</field>
         <field name="inherit_id" ref="hr_payroll.hr_payslip_run_form"/>
+        <field name="priority">20</field>
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
-                <button name="action_submit_for_approval" string="Submit for Approval" type="object"
-                    invisible="state != 'verify' or approval_done"
-                    class="oe_highlight"/>
+                <button name="action_submit_for_approval" string="Submit for approval" type="object"
+                        title="Send this batch to Head of HR for review"
+                        invisible="state != 'verify' or approval_done"
+                        class="oe_highlight"/>
                 <button name="action_approve_hr" string="Approve (HR)" type="object"
-                    invisible="state != 'wait_hr'"
-                    class="oe_highlight" groups="fs_hr_contract.group_head_of_hr"/>
+                        title="Approve on behalf of Head of HR and send to Finance"
+                        invisible="state != 'wait_hr'"
+                        class="oe_highlight" groups="fs_hr_contract.group_head_of_hr"/>
                 <button name="action_approve_finance" string="Approve (Finance)" type="object"
-                    invisible="state != 'wait_finance'"
-                    class="oe_highlight" groups="fs_hr_contract.group_vp_finance"/>
+                        title="Final approval — allows confirming the batch"
+                        invisible="state != 'wait_finance'"
+                        class="oe_highlight" groups="fs_hr_contract.group_vp_finance"/>
                 <button name="action_reject" string="Reject" type="object"
-                    invisible="state not in ('wait_hr', 'wait_finance')"
-                    groups="fs_hr_contract.group_head_of_hr,fs_hr_contract.group_vp_finance"/>
+                        title="Return the batch to review; approvals must be restarted"
+                        invisible="state not in ('wait_hr', 'wait_finance')"
+                        groups="fs_hr_contract.group_head_of_hr,fs_hr_contract.group_vp_finance"/>
             </xpath>
+
+            <xpath expr="//sheet" position="inside">
+                <field name="approval_done" invisible="1"/>
+                <div class="alert alert-warning mb-3" role="status" invisible="state != 'wait_hr'">
+                    <strong>Waiting for Head of HR.</strong>
+                    HR can approve or reject from the header. Finance cannot act until HR approves.
+                </div>
+                <div class="alert alert-warning mb-3" role="status" invisible="state != 'wait_finance'">
+                    <strong>Waiting for Finance.</strong>
+                    HR has approved. Finance gives the final sign-off so payroll can be confirmed.
+                </div>
+                <div class="alert alert-info mb-3" role="status" invisible="state != 'verify' or approval_done">
+                    <strong>Approvals required.</strong>
+                    Generate payslips, then use <strong>Submit for approval</strong>.
+                    The <strong>Validate</strong> action stays hidden until Finance approves.
+                </div>
+                <div class="alert alert-success mb-3" role="status" invisible="state != 'verify' or not approval_done">
+                    <strong>Ready to process.</strong>
+                    HR and Finance approvals are complete. You can validate and continue the normal payroll flow.
+                </div>
+            </xpath>
+
             <xpath expr="//button[@name='action_validate']" position="attributes">
+                <attribute name="string">Validate</attribute>
+                <attribute name="title">Available only after Finance approval</attribute>
                 <attribute name="invisible">state != 'verify' or not approval_done</attribute>
             </xpath>
             <xpath expr="//field[@name='state']" position="attributes">
                 <attribute name="statusbar_visible">draft,verify,wait_hr,wait_finance,close,paid</attribute>
             </xpath>
-            <xpath expr="//sheet" position="inside">
-                <field name="approval_done" invisible="1"/>
+        </field>
+    </record>
+
+    <record id="hr_payslip_run_tree_inherit_approval" model="ir.ui.view">
+        <field name="name">hr.payslip.run.tree.inherit.approval</field>
+        <field name="model">hr.payslip.run</field>
+        <field name="inherit_id" ref="hr_payroll.hr_payslip_run_tree"/>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="after">
+                <field name="approval_done" string="Finance OK" optional="show" readonly="1"/>
             </xpath>
         </field>
     </record>
+
+    <record id="hr_payslip_run_filter_inherit_approval" model="ir.ui.view">
+        <field name="name">hr.payslip.run.search.inherit.approval</field>
+        <field name="model">hr.payslip.run</field>
+        <field name="inherit_id" ref="hr_payroll.hr_payslip_run_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='done_filter']" position="after">
+                <separator/>
+                <filter string="Waiting HR" name="filter_wait_hr" domain="[('state', '=', 'wait_hr')]"/>
+                <filter string="Waiting Finance" name="filter_wait_finance" domain="[('state', '=', 'wait_finance')]"/>
+                <filter string="Ready to validate" name="filter_ready_validate"
+                        domain="[('state', '=', 'verify'), ('approval_done', '=', True)]"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_hr_payslip_run_waiting_approval" model="ir.actions.act_window">
+        <field name="name">Awaiting HR / Finance</field>
+        <field name="res_model">hr.payslip.run</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="domain">["|", ("state", "=", "wait_hr"), ("state", "=", "wait_finance")]</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Nothing in the approval queue.</p>
+            <p>Open a payslip batch in <em>To Review</em>, generate payslips, then use <strong>Submit for approval</strong>.</p>
+        </field>
+    </record>
+
+    <record id="action_hr_payslip_run_wait_hr" model="ir.actions.act_window">
+        <field name="name">Waiting HR</field>
+        <field name="res_model">hr.payslip.run</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="domain">[("state", "=", "wait_hr")]</field>
+        <field name="context">{}</field>
+    </record>
+
+    <record id="action_hr_payslip_run_wait_finance" model="ir.actions.act_window">
+        <field name="name">Waiting Finance</field>
+        <field name="res_model">hr.payslip.run</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="domain">[("state", "=", "wait_finance")]</field>
+        <field name="context">{}</field>
+    </record>
+
+    <menuitem id="menu_payroll_approval_queues"
+              name="Approvals"
+              parent="hr_work_entry_contract_enterprise.menu_hr_payroll_root"
+              sequence="15"
+              groups="hr_payroll.group_hr_payroll_user"/>
+
+    <menuitem id="menu_payroll_approval_waiting"
+              name="Awaiting HR / Finance"
+              parent="menu_payroll_approval_queues"
+              action="action_hr_payslip_run_waiting_approval"
+              sequence="10"/>
+
+    <menuitem id="menu_payroll_approval_wait_hr"
+              name="Waiting HR"
+              parent="menu_payroll_approval_queues"
+              action="action_hr_payslip_run_wait_hr"
+              sequence="20"
+              groups="fs_hr_contract.group_head_of_hr,base.group_system"/>
+
+    <menuitem id="menu_payroll_approval_wait_finance"
+              name="Waiting Finance"
+              parent="menu_payroll_approval_queues"
+              action="action_hr_payslip_run_wait_finance"
+              sequence="30"
+              groups="fs_hr_contract.group_vp_finance,base.group_system"/>
 </odoo>

@@ -1,26 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="hr_payslip_form_inherit_payroll_info" model="ir.ui.view">
-        <field name="name">hr.payslip.form.inherit.payroll.info</field>
+        <field name="name">hr.payslip.form.payroll.calendar</field>
         <field name="model">hr.payslip</field>
         <field name="inherit_id" ref="hr_payroll.view_hr_payslip_form"/>
+        <field name="priority">25</field>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='payslip_run_id']" position="after">
-                <separator string="Payroll Tracking"/>
-                <group>
+            <xpath expr="//page[@name='salary_computation']" position="after">
+                <page string="Payroll timing"
+                      name="payroll_dynamic_timing"
+                      groups="hr_payroll.group_hr_payroll_user">
+                    <p class="text-muted mb-3">
+                        Read-only schedules reflect this payslip period and contract rules (join cut-offs from Settings, or overrides).
+                        Finer control for edge cases stays on this payslip until it is Done or Paid.
+                    </p>
                     <group>
-                        <field name="payroll_booking_month" readonly="state in ['done', 'paid']"/>
-                        <field name="first_salary_payment_month"
-                            optional="show"
-                            attrs="{'readonly': ['|', ('state', 'in', ['done', 'paid']), ('cut_off_override', '=', False)]}"/>
-                        <field name="eos_accrual_start_date" readonly="state in ['done', 'paid']"/>
+                        <group string="Derived schedule">
+                            <field name="payroll_booking_month" readonly="1"/>
+                            <field name="first_salary_payment_month" readonly="1"/>
+                            <field name="eos_accrual_start_date" readonly="1"/>
+                        </group>
+                        <group string="Override on this payslip">
+                            <field name="cut_off_override"
+                                   readonly="state in ('done', 'paid')"/>
+                            <field name="first_salary_month_override"
+                                   invisible="not cut_off_override"
+                                   readonly="state in ('done', 'paid')"/>
+                        </group>
                     </group>
-                    <group>
-                        <field name="cut_off_override"
-                            readonly="state in ['done', 'paid']"
-                            help="Override the 25th cut-off rule for this payslip."/>
-                    </group>
-                </group>
+                </page>
             </xpath>
         </field>
     </record>

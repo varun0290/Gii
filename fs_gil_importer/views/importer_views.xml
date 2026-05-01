@@ -187,4 +187,19 @@
             </xpath>
         </field>
     </record>
+
+    <!-- Footer total for Amount in Currency (matches Amount column sum behavior) -->
+    <record id="view_account_payment_tree_inherit_amount_currency_sum" model="ir.ui.view">
+        <field name="name">account.payment.tree.inherit.amount.currency.sum</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_signed'][@optional='hide']" position="attributes">
+                <attribute name="sum">Total</attribute>
+            </xpath>
+            <xpath expr="//field[@name='amount_signed'][@optional='show']" position="attributes">
+                <attribute name="sum">Total</attribute>
+            </xpath>
+        </field>
+    </record>
 </odoo>

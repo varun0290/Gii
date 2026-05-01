@@ -51,11 +51,17 @@ class HrEmployeeProbation(models.Model):
 
     # override the existing function for considering the probation contracts
     def _get_contracts(
-        self, date_from, date_to, states=["open", "probation"], kanban_state=False
+        self, date_from, date_to, states=None, kanban_state=False
     ):
         """
         Returns the contracts of the employee between date_from and date_to
         """
+        if states is None:
+            states = ["open", "probation"]
+        else:
+            states = list(states)
+            if "probation" not in states and "open" in states:
+                states.append("probation")
         state_domain = [("state", "in", states)]
         if kanban_state:
             state_domain = expression.AND(

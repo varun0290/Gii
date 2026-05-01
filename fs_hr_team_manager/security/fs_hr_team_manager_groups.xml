@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="group_fs_hr_team_manager" model="res.groups">
+        <field name="name">HR Team Manager</field>
+        <field name="category_id" ref="base.module_category_human_resources_employees"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="comment">
+            Read-focused HR access limited to the linked employee record and all subordinates
+            in the hierarchy (parent / parent_path). Assign users under Employees / HR Settings with a
+            linked Employee profile. Do not combine with Officer: Manage all employees — that group
+            bypasses team scoping.
+        </field>
+    </record>
+</odoo>
