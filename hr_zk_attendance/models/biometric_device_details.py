@@ -179,6 +179,35 @@ class BiometricDeviceDetails(models.Model):
         except pytz.exceptions.UnknownTimeZoneError as err:
             raise UserError(_("Unknown attendance timezone %s") % self._attendance_tz_name()) from err
 
+    def _find_employee_by_biometric_code(self, biometric_code):
+        """Resolve employee: API EmployeeCode equals hr.employee.identification_id."""
+        self.ensure_one()
+        code = (biometric_code or "").strip()
+        if not code:
+            return self.env["hr.employee"].sudo().browse()
+
+        Employee = self.env["hr.employee"].sudo()
+
+        emp = Employee.search(
+            [
+                ("company_id", "=", self.company_id.id),
+                ("active", "=", True),
+                ("identification_id", "=", code),
+            ],
+            limit=1,
+        )
+        if emp:
+            return emp
+
+        return Employee.search(
+            [
+                ("company_id", "=", False),
+                ("active", "=", True),
+                ("identification_id", "=", code),
+            ],
+            limit=1,
+        )
+
     def _apply_aggregated_to_hr_attendance(self, aggregated_records):
         """Create or update hr.attendance using min check-in / max check-out pairs."""
         self.ensure_one()
@@ -216,16 +245,10 @@ class BiometricDeviceDetails(models.Model):
             if not cleaned_user_id:
                 continue
 
-            employee = self.env["hr.employee"].sudo().search(
-                [
-                    ("device_id_num", "=", cleaned_user_id),
-                    ("company_id", "=", self.company_id.id),
-                ],
-                limit=1,
-            )
+            employee = self._find_employee_by_biometric_code(cleaned_user_id)
             if not employee:
                 _logger.warning(
-                    "No employee for biometric code %s in company %s",
+                    "No employee with Identification No matching %s in company %s",
                     cleaned_user_id,
                     self.company_id.name,
                 )
@@ -299,7 +322,7 @@ class BiometricDeviceDetails(models.Model):
 
     @staticmethod
     def _api_coerce_employee_code(value):
-        """GetDeviceLogs EmployeeCode — keep full value for hr.employee.device_id_num."""
+        """GetDeviceLogs EmployeeCode — must match hr.employee.identification_id."""
         if value is None or value is False:
             return None
         if isinstance(value, bool):

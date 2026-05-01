@@ -90,13 +90,14 @@
                             <separator string="Web API — GetDeviceLogs JSON"
                                        invisible="connection_mode != 'web_api'"/>
                             <div class="text-muted mb-2" invisible="connection_mode != 'web_api'">
-                                Rows match your gateway JSON:
-                                <code>EmployeeCode</code>, <code>LogDate</code>
+                                Each <code>EmployeeCode</code> must match the employee
+                                <b>Identification No.</b> (<code>identification_id</code>) in Odoo.
+                                Rows use <code>LogDate</code>
                                 (<code>YYYY-MM-DD HH:MM:SS</code>),
                                 optional <code>SerialNumber</code>,
                                 <code>PunchDirection</code>
                                 (<code>in</code>/<code>out</code> or blank for undirected),
-                                plus <code>Temperature</code> / <code>TemperatureState</code> (stored but not used).
+                                plus <code>Temperature</code> / <code>TemperatureState</code> (ignored for matching).
                             </div>
                             <group invisible="connection_mode != 'web_api'">
                                 <group>
