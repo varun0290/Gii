@@ -180,31 +180,29 @@ class BiometricDeviceDetails(models.Model):
             raise UserError(_("Unknown attendance timezone %s") % self._attendance_tz_name()) from err
 
     def _find_employee_by_biometric_code(self, biometric_code):
-        """Resolve employee: API EmployeeCode equals hr.employee.identification_id."""
+        """Resolve employee: API EmployeeCode matches employee_code or identification_id."""
         self.ensure_one()
         code = (biometric_code or "").strip()
         if not code:
             return self.env["hr.employee"].sudo().browse()
 
         Employee = self.env["hr.employee"].sudo()
+        match_leaf = ["|", ("employee_code", "=", code),
+                      ("identification_id", "=", code)]
 
         emp = Employee.search(
             [
                 ("company_id", "=", self.company_id.id),
                 ("active", "=", True),
-                ("identification_id", "=", code),
-            ],
+            ]
+            + match_leaf,
             limit=1,
         )
         if emp:
             return emp
 
         return Employee.search(
-            [
-                ("company_id", "=", False),
-                ("active", "=", True),
-                ("identification_id", "=", code),
-            ],
+            [("company_id", "=", False), ("active", "=", True)] + match_leaf,
             limit=1,
         )
 
@@ -248,7 +246,7 @@ class BiometricDeviceDetails(models.Model):
             employee = self._find_employee_by_biometric_code(cleaned_user_id)
             if not employee:
                 _logger.warning(
-                    "No employee with Identification No matching %s in company %s",
+                    "No employee with Employee Code or Identification No. matching %s in company %s",
                     cleaned_user_id,
                     self.company_id.name,
                 )
@@ -322,7 +320,7 @@ class BiometricDeviceDetails(models.Model):
 
     @staticmethod
     def _api_coerce_employee_code(value):
-        """GetDeviceLogs EmployeeCode — must match hr.employee.identification_id."""
+        """GetDeviceLogs EmployeeCode — matches hr.employee.employee_code or identification_id."""
         if value is None or value is False:
             return None
         if isinstance(value, bool):

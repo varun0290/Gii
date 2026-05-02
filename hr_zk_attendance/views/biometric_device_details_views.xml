@@ -90,8 +90,8 @@
                             <separator string="Web API — GetDeviceLogs JSON"
                                        invisible="connection_mode != 'web_api'"/>
                             <div class="text-muted mb-2" invisible="connection_mode != 'web_api'">
-                                Each <code>EmployeeCode</code> must match the employee
-                                <b>Identification No.</b> (<code>identification_id</code>) in Odoo.
+                                Each <code>EmployeeCode</code> must match the employee's
+                                <b>Employee Code</b> or <b>Identification No.</b> in Odoo.
                                 Rows use <code>LogDate</code>
                                 (<code>YYYY-MM-DD HH:MM:SS</code>),
                                 optional <code>SerialNumber</code>,

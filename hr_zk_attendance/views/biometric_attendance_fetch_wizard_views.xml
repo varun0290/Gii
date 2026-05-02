@@ -18,7 +18,8 @@
                 </group>
                 <div class="alert alert-info mb-0" role="status">
                     Sends <code>FromDate</code> and <code>ToDate</code> to your GetDeviceLogs endpoint.
-                    Each <code>EmployeeCode</code> must match the employee <b>Identification No.</b> in Odoo.
+                    Each <code>EmployeeCode</code> must match the employee's
+                    <b>Employee Code</b> or <b>Identification No.</b> in Odoo.
                 </div>
                 <footer>
                     <button name="action_fetch_attendance" type="object" string="Fetch attendance"

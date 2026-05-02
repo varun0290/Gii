@@ -28,3 +28,8 @@ class HrEmployeeBase(models.AbstractModel):
 
     device_id_num = fields.Char(string='Biometric Device ID',
                                 help="Give the biometric device id")
+    employee_code = fields.Char(
+        string='Employee Code',
+        help="Code sent by the biometric device as EmployeeCode. When set, attendance sync "
+             "matches this value or Identification No.; leave empty to use Identification No. only.",
+    )

@@ -7,11 +7,15 @@
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='identification_id']" position="attributes">
-                <attribute name="help">Must match the EmployeeCode from your biometric API or device when syncing attendance.</attribute>
+                <attribute name="help">Used for attendance sync when Employee Code is empty; otherwise either field may match device EmployeeCode.</attribute>
+            </xpath>
+            <xpath expr="//field[@name='identification_id']" position="after">
+                <field name="employee_code"
+                       placeholder="Biometric EmployeeCode"/>
             </xpath>
             <xpath expr="//field[@name='employee_type']" position="after">
                 <field name="device_id_num" optional="hide"
-                       help="Not used for attendance sync; EmployeeCode is matched to Identification No. instead."/>
+                       help="Optional legacy biometric user id; attendance sync matches device user id to Employee Code or Identification No."/>
             </xpath>
         </field>
     </record>
