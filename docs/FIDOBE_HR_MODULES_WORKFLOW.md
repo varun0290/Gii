@@ -142,4 +142,151 @@ These are referenced by **fs_hr** so they install together; detailed workflows f
 
 ---
 
+## 8. Deployment reality for GII
+
+### 8.1 Code layers on the server
+
+The GII environments are not driven by a single addons repository. The effective runtime stack is layered:
+
+- **Odoo Community core** from `/home/odoo/src/odoo`
+- **Enterprise** addons from `/home/odoo/src/enterprise`
+- **Themes** from `/home/odoo/src/themes`
+- **Project / customer addons** from `/home/odoo/src/user`
+
+For the branch environments checked during this investigation, the runtime addons path logged by Odoo was:
+
+- `/home/odoo/src/odoo/odoo/addons`
+- `/home/odoo/.local/share/Odoo/addons/17.0`
+- `/home/odoo/src/user`
+- `/home/odoo/src/odoo/addons`
+- `/home/odoo/src/enterprise`
+- `/home/odoo/src/themes`
+- `/home/odoo/data/addons/17.0`
+
+### 8.2 Repo split: GII vs OpenHR
+
+The **GII** repo (`varun0290/Gii`, mirrored from `giluat.livbuzz.com`) contains the Fidobe/project layer, especially the `fs_*` modules and selected HR / payroll custom modules.
+
+However, the restored databases also expect a second code source:
+
+- **ent_openhr** (Bitbucket)
+
+That separate OpenHR/vendor repo is the source of base modules such as:
+
+- `ent_hr_employee_updation`
+- `ent_hr_reward_warning`
+- `ent_hr_resignation`
+- `ent_hrms_dashboard`
+
+This means:
+
+- **`fs_*` modules are not replacements for the matching `ent_*` modules**
+- several `fs_*` modules are **custom layers on top of** missing vendor/base modules
+
+### 8.3 Important example: resignation flow
+
+`fs_ent_hr_resignation` exists in GII, but it depends on:
+
+- `hr`
+- `ent_hr_resignation`
+
+So the database can only load resignation features correctly if **both** are present:
+
+1. `ent_hr_resignation` provides the base `hr.resignation` model
+2. `fs_ent_hr_resignation` applies Fidobe-specific extensions on top of that base
+
+### 8.4 Important example: dashboard flow
+
+The `hr_dashboard` client action belongs to:
+
+- `ent_hrms_dashboard`
+
+If that module is missing from the runtime addons path, the frontend fails with:
+
+- `KeyNotFoundError: Cannot find hr_dashboard in this registry!`
+
+---
+
+## 9. Live vs UAT side-by-side findings
+
+### 9.1 Database restore targets used
+
+**Live**
+
+- Host: `32132822@varun0290-gii.odoo.com`
+- Database: `varun0290-gii-main-32132822`
+- Dump restored: `gil_prod_2026-05-13_05-14-39.dump`
+
+**UAT**
+
+- Host: `32135406@varun0290-gii-uat2-32135406.dev.odoo.com`
+- Database: `varun0290-gii-uat2-32135406`
+- Dump restored: `gil_uat2_2026-05-13_06-46-47.dump`
+
+### 9.2 Shared problem observed after restore
+
+Both environments initially showed the same functional breakage:
+
+- Python-side missing model: `hr.resignation`
+- Frontend missing client action registry key: `hr_dashboard`
+
+The reason was the same on both databases:
+
+- the databases had OpenHR modules marked **installed**
+- the branch code deployed in `/home/odoo/src/user` only contained the GII repo
+- the required OpenHR/vendor module folders were not present on disk
+
+### 9.3 Concrete UAT remediation applied
+
+UAT was used as the first proving ground.
+
+The following missing OpenHR module folders were added to `/home/odoo/src/user` on UAT:
+
+- `ent_hr_employee_updation`
+- `ent_hr_reward_warning`
+- `ent_hr_resignation`
+- `ent_hrms_dashboard`
+
+After that, a targeted module update was run on UAT for:
+
+- `ent_hr_employee_updation`
+- `ent_hr_reward_warning`
+- `ent_hr_resignation`
+- `ent_hrms_dashboard`
+
+### 9.4 Signs the UAT fix succeeded
+
+After the UAT code upload and module update:
+
+- the server log showed `ent_hrms_dashboard` loading successfully
+- `hr.resignation` model fields were loaded
+- the static dashboard icon route began returning **HTTP 200**
+- the original missing-module problem was no longer the active blocker on UAT
+
+### 9.5 Remaining caution
+
+The OpenHR family has more modules than the four listed above. The log still referenced additional missing OpenHR modules such as:
+
+- `ent_hrms_core`
+- `ent_hr_reminder`
+- `ent_hr_leave_request_aliasing`
+- `ent_employee_documents_expiry`
+- `ent_ohrms_loan`
+- `ent_ohrms_salary_advance`
+
+Those are **not the same issue** as the original `hr_dashboard` / `hr.resignation` failure, but they should be evaluated before any broad production rollout.
+
+---
+
+## 10. Recommended rollout order
+
+1. **Fix and validate on UAT first**.
+2. Re-test the exact HR dashboard and resignation flows that were failing.
+3. Compare UAT and live installed modules to identify any further OpenHR/vendor gaps.
+4. Only after UAT is stable, decide whether to:
+   - bring the same missing OpenHR modules into live, or
+   - rationalise `fs_*` and `ent_*` usage more broadly.
+
+---
+
 *Generated as a single-source overview for the Fidobe HR custom modules and HR Team Manager behaviour. Update this file when you add or change modules.*
