@@ -21,7 +21,9 @@ class HrEmployee(models.Model):
     def _bootstrap_resign_flags_from_departure_reason(self):
         """Align OpenHR booleans after employees were archived via the standard wizard."""
         env = self.env
-        Employee = env['hr.employee'].sudo()
+        # Archived employees are the exact records that drive the "Resigned" /
+        # "Fired" filters, so the bootstrap must ignore the default active_test.
+        Employee = env['hr.employee'].sudo().with_context(active_test=False)
         if 'resigned' not in Employee._fields or 'departure_reason_id' not in Employee._fields:
             return
 
