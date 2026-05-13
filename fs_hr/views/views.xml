@@ -75,7 +75,7 @@
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr_contract.view_employee_tree"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='first_contract_date']" position="before">
+            <xpath expr="//field[@name='work_email']" position="after">
                 <field name="registration_number"/>
             </xpath>
         </field>

@@ -12,6 +12,9 @@
                 <field name="probation_review_date" readonly="1"/>
                 <field name="final_probation_date" readonly="1"/>
             </xpath>
+            <xpath expr="//field[@name='work_location_id']" position="attributes">
+                <attribute name="domain">[]</attribute>
+            </xpath>
             <!-- Add our custom pages structure -->
             <xpath expr="//notebook" position="inside">
                 <!-- Employment Information Page -->
@@ -142,4 +145,5 @@
             </xpath>
         </field>
     </record>
+
 </odoo>

@@ -194,6 +194,9 @@
         <field name="model">account.payment</field>
         <field name="inherit_id" ref="account.view_account_payment_tree"/>
         <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_currency']" position="attributes">
+                <attribute name="sum">Total</attribute>
+            </xpath>
             <xpath expr="//field[@name='amount_signed'][@optional='hide']" position="attributes">
                 <attribute name="sum">Total</attribute>
             </xpath>

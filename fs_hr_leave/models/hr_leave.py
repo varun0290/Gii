@@ -49,6 +49,16 @@ class HrLeave(models.Model):
             leave._send_time_off_approval_reminder_email(partners)
             leave.timeoff_reminder_last_send_date = today
 
+    @api.depends('employee_id', 'employee_ids')
+    def _compute_from_employee_id(self):
+        super()._compute_from_employee_id()
+        for leave in self:
+            if leave.manager_id or not leave.employee_id:
+                continue
+            # Some GII employees rely on Leave Manager instead of the direct parent,
+            # so keep exports/reporting populated even when the org chart manager is empty.
+            leave.manager_id = leave.employee_id.leave_manager_id or leave.employee_id.parent_id
+
     def _send_time_off_approval_reminder_email(self, partner_records):
         self.ensure_one()
         env = self.env
